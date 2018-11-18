@@ -1,0 +1,2 @@
+class IntervalTimerException(Exception):
+    pass
