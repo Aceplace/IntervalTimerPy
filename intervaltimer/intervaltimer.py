@@ -1,8 +1,11 @@
 import tkinter as tk
+import json
 
 # Expected Script Format
 # List of Periods
 # Each Period -> {'length': , 'period number', 'period announcement times'}
+from misc.intervaltimerexception import IntervalTimerException
+
 
 def seconds_to_minutes_seconds_string(num_seconds):
     num_minutes_string = str(num_seconds // 60)
@@ -157,11 +160,35 @@ class IntervalTimer(tk.Frame):
         self.time_remaining_in_period = self.script[self.current_period]['length'] - int(new_slider_value)
         self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
 
+    def load_interval_timer_prefs(self, file_name):
+        try:
+            with open(file_name, 'r') as file:
+                prefs_dict = json.load(file)
+                self.period_lbl_size = prefs_dict['period_lbl_size']
+                self.time_lbl_one_digit_size = prefs_dict['time_lbl_one_digit_size']
+                self.time_lbl_two_digit_size = prefs_dict['time_lbl_two_digit_size']
+                self.time_lbl.configure(font=('Times', self.get_time_label_size_for_time_remaining()))
+                self.period_lbl.configure(font=('Times',self.period_lbl_size))
+
+        except (IOError, KeyError) as e:
+            raise IntervalTimerException(f'Error reading preference file: {str(e)}')
+
+    def save_interval_timer_prefs(self, file_name):
+        prefs_dict = {'period_lbl_size': self.period_lbl_size,
+                      'time_lbl_one_digit_size': self.time_lbl_one_digit_size,
+                      'time_lbl_two_digit_size': self.time_lbl_two_digit_size}
+
+        try:
+            with open(file_name, 'w') as file:
+                json.dump(prefs_dict, file)
+        except IOError as e:
+            raise IntervalTimerException(f'File write error: {str(e)}')
+
 
 if __name__=='__main__':
-    from schedule import Schedule
-    from scheduleintervaltimeradapter import schedule_to_interval_timer_script
-    from periodannouncementprefs import PeriodAnnouncementPrefs
+    from schedule.schedule import Schedule
+    from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
+    from schedule.periodannouncementprefs import PeriodAnnouncementPrefs
     schedule = Schedule()
     schedule.periods = [10, 20, 30, 40 , 50, 60]
     period_announcement_prefs = PeriodAnnouncementPrefs()
@@ -172,5 +199,12 @@ if __name__=='__main__':
     root = tk.Tk()
     interval_timer = IntervalTimer(root, interval_timer_script)
     interval_timer.pack(fill=tk.BOTH, expand=True)
+    interval_timer.load_interval_timer_prefs('intervaltimerprefs.json')
+
+    def on_exit():
+        interval_timer.save_interval_timer_prefs('intervaltimerprefs.json')
+        root.destroy()
+    root.protocol('WM_DELETE_WINDOW', on_exit)
+
     root.mainloop()
 

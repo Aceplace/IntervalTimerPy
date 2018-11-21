@@ -1,4 +1,4 @@
-from schedule import Schedule
+from schedule.schedule import Schedule
 
 
 class ScheduleEditorController:

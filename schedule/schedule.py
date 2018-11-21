@@ -1,4 +1,4 @@
-from intervaltimerexception import IntervalTimerException
+from misc.intervaltimerexception import IntervalTimerException
 import json
 
 #time units are half-minutes

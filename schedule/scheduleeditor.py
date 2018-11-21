@@ -1,5 +1,5 @@
 import tkinter as tk
-import schedule
+from schedule import schedule
 
 
 class ScheduleEditor(tk.Frame):
@@ -94,7 +94,7 @@ class ScheduleEditor(tk.Frame):
 
 if __name__=='__main__':
     root = tk.Tk()
-    from scheduleeditorcontroller import ScheduleEditorController
+    from schedule.scheduleeditorcontroller import ScheduleEditorController
     controller = ScheduleEditorController()
     controller.schedule.periods = [10, 20, 40, 50, 35, 5, 5, 5, 5, 5, 5, 5]
     controller.schedule.does_include_period_zero = True

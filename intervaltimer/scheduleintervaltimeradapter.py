@@ -12,8 +12,8 @@ def to_seconds(half_minutes):
     return half_minutes * 30
 
 if __name__=='__main__':
-    from schedule import Schedule
-    from periodannouncementprefs import PeriodAnnouncementPrefs
+    from schedule.schedule import Schedule
+    from schedule.periodannouncementprefs import PeriodAnnouncementPrefs
     schedule = Schedule()
     schedule.periods = [20, 20, 20, 60]
     announcement_prefs = PeriodAnnouncementPrefs()

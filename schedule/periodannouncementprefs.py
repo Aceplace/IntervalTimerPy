@@ -1,6 +1,6 @@
 import json
-import schedule
-from intervaltimerexception import IntervalTimerException
+from schedule import schedule
+from misc.intervaltimerexception import IntervalTimerException
 
 
 class PeriodAnnouncementPrefs:
