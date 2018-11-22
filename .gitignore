@@ -1,3 +1,3 @@
-sounds/
 .idea/
 __pycache__/
+*.wav

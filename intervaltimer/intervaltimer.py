@@ -188,7 +188,7 @@ class IntervalTimer(tk.Frame):
 if __name__=='__main__':
     from schedule.schedule import Schedule
     from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
-    from schedule.periodannouncementprefs import PeriodAnnouncementPrefs
+    from intervaltimer.periodannouncementprefs import PeriodAnnouncementPrefs
     schedule = Schedule()
     schedule.periods = [10, 20, 30, 40 , 50, 60]
     period_announcement_prefs = PeriodAnnouncementPrefs()

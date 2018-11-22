@@ -13,7 +13,7 @@ def to_seconds(half_minutes):
 
 if __name__=='__main__':
     from schedule.schedule import Schedule
-    from schedule.periodannouncementprefs import PeriodAnnouncementPrefs
+    from intervaltimer.periodannouncementprefs import PeriodAnnouncementPrefs
     schedule = Schedule()
     schedule.periods = [20, 20, 20, 60]
     announcement_prefs = PeriodAnnouncementPrefs()
