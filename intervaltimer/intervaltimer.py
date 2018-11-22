@@ -23,6 +23,7 @@ class IntervalTimer(tk.Frame):
         self.period_lbl_size = 240
         self.time_lbl_two_digit_size = 330
         self.time_lbl_one_digit_size = 370
+        self.announcement_callback = None
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -83,6 +84,9 @@ class IntervalTimer(tk.Frame):
                 self.time_remaining_in_period = self.script[self.current_period]['length']
                 self.interval_timer_slider.configure(to_=self.time_remaining_in_period - 1)
                 self.period_lbl.configure(text=str(self.script[self.current_period]['period number']))
+
+            if self.announcement_callback:
+                self.announcement_callback(self.current_period, self.time_remaining_in_period, self.script)
 
         if self.script:
             self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))

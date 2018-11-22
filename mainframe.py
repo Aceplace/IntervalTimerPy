@@ -7,11 +7,14 @@ from misc.intervaltimerexception import IntervalTimerException
 from intervaltimer.periodannouncementprefs import PeriodAnnouncementPrefs
 from schedule.scheduleeditor import ScheduleEditor
 from schedule.scheduleeditorcontroller import ScheduleEditorController
+from sounds.scriptannouncementtimeadapter import AnnouncementTimeHandler
+from sounds.soundmanager import SoundManager
 
 
 class App(tk.Tk):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, sound_manager_adapter, *args, **kwargs):
         super(App, self).__init__(*args, **kwargs)
+        self.sound_manager_adapter = sound_manager_adapter
 
         self.announcement_time_prefs = PeriodAnnouncementPrefs()
         try:
@@ -69,6 +72,7 @@ class App(tk.Tk):
                 self.frames[IntervalTimer] = IntervalTimer(self.mainframe, interval_timer_script)
                 self.frames[IntervalTimer].grid(row=0, column=0, sticky='NSEW')
                 self.frames[IntervalTimer].load_interval_timer_prefs('intervaltimerprefs.json')
+                self.frames[IntervalTimer].announcement_callback = self.sound_manager_adapter.handle_script_announcements
                 self.current_frame = self.frames[IntervalTimer]
             else:
                 messagebox.showerror('Interval Timer Error', 'Script must have at least one period.')
@@ -80,7 +84,10 @@ class App(tk.Tk):
         self.destroy()
 
 
-root = App()
+sound_manager = SoundManager('sounds')
+sound_manager_adapter = AnnouncementTimeHandler(sound_manager)
+root = App(sound_manager_adapter)
+
 root.state('zoomed')
 root.protocol('WM_DELETE_WINDOW', root.on_close)
 root.mainloop()
