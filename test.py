@@ -4,15 +4,18 @@ import subprocess
 import threading
 import json
 
-json_string = '{"2": null}'
-print(json.loads(json_string))
 
-p = subprocess.Popen([r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe", '--intf', 'qt', '--extraintf', 'rc', '--rc-host', 'localhost:50000'])
-#p = subprocess.Popen([r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe", '--intf', 'qt', '--extraintf', 'rc'])
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.bind(('localhost', 0))
+port = sock.getsockname()[1]
+sock.close()
+
+subprocess.Popen([r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe", '--intf', 'qt', '--extraintf', 'rc', '--rc-host', f'localhost:50000'])
+#subprocess.Popen([r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe", '--intf', 'qt', '--extraintf', 'rc'])
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(('localhost',50000))
+sock.connect(('localhost',port))
 
 root = tk.Tk()
 message_entry = tk.Entry(root)
@@ -27,7 +30,7 @@ def send_message():
 def listen_to_vlc():
     while True:
         message = sock.recv(1024)
-        print(message)
+        print(message.decode())
 
 thread = threading.Thread(target=listen_to_vlc)
 thread.start()

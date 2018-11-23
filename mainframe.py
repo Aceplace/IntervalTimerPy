@@ -7,8 +7,8 @@ from intervaltimer.intervaltimer import IntervalTimer
 from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
 from schedule.scheduleeditor import ScheduleEditor
 from schedule.scheduleeditorcontroller import ScheduleEditorController
-from sounds.announcementtimehandler import AnnouncementTimeHandler
-from sounds.soundmanager import SoundManager
+from soundmanager.announcementtimehandler import AnnouncementTimeHandler
+from soundmanager.soundmanager import SoundManager
 
 
 class App(tk.Tk):
