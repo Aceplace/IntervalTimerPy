@@ -2,8 +2,16 @@ import json
 from schedule import schedule
 from misc.intervaltimerexception import IntervalTimerException
 
+def convert_to_interval_timer_period_announcement_times(period_announcement_times_string_keys):
+    return {int(key):value for (key,value) in period_announcement_times_string_keys.items()}
 
-class PeriodAnnouncementPrefs:
+def get_default_interval_timer_period_announcement_times():
+    period_announcement_times = {}
+    for length in range(1, schedule.Schedule.MAX_PERIOD_LENGTH + 1):
+        period_announcement_times[length] = []
+    return period_announcement_times
+
+class PeriodAnnouncementAdapter:
     def __init__(self):
         self.period_announcement_times = {}
         for length in range(1, schedule.Schedule.MAX_PERIOD_LENGTH + 1):
@@ -27,7 +35,7 @@ class PeriodAnnouncementPrefs:
 
 
 if __name__=='__main__':
-    prefs = PeriodAnnouncementPrefs()
+    prefs = PeriodAnnouncementAdapter()
     print(prefs.period_announcement_times)
     prefs.load_from_json('announcementprefs.json')
     print(prefs.period_announcement_times)

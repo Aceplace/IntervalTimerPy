@@ -14,15 +14,15 @@ def seconds_to_minutes_seconds_string(num_seconds):
 
 
 class IntervalTimer(tk.Frame):
-    def __init__(self, root, script):
+    def __init__(self, root, script, prefs=None):
         super(IntervalTimer, self).__init__(root)
         self.script = script
         self.current_period = 0
         self.time_remaining_in_period = 0
         self.is_playing = False
-        self.period_lbl_size = 240
-        self.time_lbl_two_digit_size = 330
-        self.time_lbl_one_digit_size = 370
+        self.period_lbl_size = 240 if not prefs else prefs['period_lbl_size']
+        self.time_lbl_two_digit_size = 330 if not prefs else prefs['time_lbl_two_digit_size']
+        self.time_lbl_one_digit_size = 370 if not prefs else prefs['time_lbl_one_digit_size']
         self.announcement_callback = None
 
         self.grid_rowconfigure(1, weight=1)
@@ -164,38 +164,28 @@ class IntervalTimer(tk.Frame):
         self.time_remaining_in_period = self.script[self.current_period]['length'] - int(new_slider_value)
         self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
 
-    def load_interval_timer_prefs(self, file_name):
-        try:
-            with open(file_name, 'r') as file:
-                prefs_dict = json.load(file)
-                self.period_lbl_size = prefs_dict['period_lbl_size']
-                self.time_lbl_one_digit_size = prefs_dict['time_lbl_one_digit_size']
-                self.time_lbl_two_digit_size = prefs_dict['time_lbl_two_digit_size']
-                self.time_lbl.configure(font=('Times', self.get_time_label_size_for_time_remaining()))
-                self.period_lbl.configure(font=('Times',self.period_lbl_size))
+    def load_prefs(self, prefs):
+        self.period_lbl_size = prefs['period_lbl_size']
+        self.time_lbl_one_digit_size = prefs['time_lbl_one_digit_size']
+        self.time_lbl_two_digit_size = prefs['time_lbl_two_digit_size']
+        self.time_lbl.configure(font=('Times', self.get_time_label_size_for_time_remaining()))
+        self.period_lbl.configure(font=('Times',self.period_lbl_size))
 
-        except (IOError, KeyError) as e:
-            raise IntervalTimerException(f'Error reading preference file: {str(e)}')
-
-    def save_interval_timer_prefs(self, file_name):
+    def get_prefs_as_dict(self):
         prefs_dict = {'period_lbl_size': self.period_lbl_size,
                       'time_lbl_one_digit_size': self.time_lbl_one_digit_size,
                       'time_lbl_two_digit_size': self.time_lbl_two_digit_size}
 
-        try:
-            with open(file_name, 'w') as file:
-                json.dump(prefs_dict, file)
-        except IOError as e:
-            raise IntervalTimerException(f'File write error: {str(e)}')
+        return prefs_dict
 
 
 if __name__=='__main__':
     from schedule.schedule import Schedule
     from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
-    from intervaltimer.periodannouncementprefs import PeriodAnnouncementPrefs
+    from intervaltimer.periodannouncementadapter import PeriodAnnouncementAdapter
     schedule = Schedule()
     schedule.periods = [10, 20, 30, 40 , 50, 60]
-    period_announcement_prefs = PeriodAnnouncementPrefs()
+    period_announcement_prefs = PeriodAnnouncementAdapter()
     period_announcement_prefs.load_from_json('announcementprefs.json')
 
     interval_timer_script = schedule_to_interval_timer_script(schedule, period_announcement_prefs)
