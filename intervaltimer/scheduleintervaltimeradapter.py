@@ -10,14 +10,3 @@ def to_seconds(half_minutes):
     if half_minutes == 0:
         return 5
     return half_minutes * 30
-
-if __name__=='__main__':
-    from schedule.schedule import Schedule
-    from intervaltimer.periodannouncementadapter import PeriodAnnouncementAdapter
-    schedule = Schedule()
-    schedule.periods = [20, 20, 20, 60]
-    announcement_prefs = PeriodAnnouncementAdapter()
-    announcement_prefs.load_from_json('announcementprefs.json')
-
-    script = schedule_to_interval_timer_script(schedule, announcement_prefs)
-    print(script)

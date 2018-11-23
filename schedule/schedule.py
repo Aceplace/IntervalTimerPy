@@ -81,16 +81,3 @@ class Schedule:
         except json.decoder.JSONDecodeError as e:
             raise IntervalTimerException(f'Schedule wrongly formatted: {str(e)}')
 
-
-
-if __name__=='__main__':
-    print(Schedule.period_length_to_string(20))
-    print(Schedule.period_length_to_string(0))
-    print(Schedule.period_length_to_string(11))
-    print(Schedule.period_length_to_string(33))
-    print(Schedule.period_length_to_string(53))
-    print(Schedule.string_to_period_length('0:30'))
-    print(Schedule.string_to_period_length('2:30'))
-    print(Schedule.string_to_period_length('5:00'))
-    print(Schedule.string_to_period_length('30:00'))
-    print(Schedule.string_to_period_length('12:30'))

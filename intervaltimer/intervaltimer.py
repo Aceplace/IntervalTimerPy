@@ -179,26 +179,3 @@ class IntervalTimer(tk.Frame):
         return prefs_dict
 
 
-if __name__=='__main__':
-    from schedule.schedule import Schedule
-    from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
-    from intervaltimer.periodannouncementadapter import PeriodAnnouncementAdapter
-    schedule = Schedule()
-    schedule.periods = [10, 20, 30, 40 , 50, 60]
-    period_announcement_prefs = PeriodAnnouncementAdapter()
-    period_announcement_prefs.load_from_json('announcementprefs.json')
-
-    interval_timer_script = schedule_to_interval_timer_script(schedule, period_announcement_prefs)
-
-    root = tk.Tk()
-    interval_timer = IntervalTimer(root, interval_timer_script)
-    interval_timer.pack(fill=tk.BOTH, expand=True)
-    interval_timer.load_interval_timer_prefs('intervaltimerprefs.json')
-
-    def on_exit():
-        interval_timer.save_interval_timer_prefs('intervaltimerprefs.json')
-        root.destroy()
-    root.protocol('WM_DELETE_WINDOW', on_exit)
-
-    root.mainloop()
-

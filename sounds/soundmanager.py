@@ -47,14 +47,3 @@ class SoundManager:
                 index += 1
 
 
-
-
-if __name__=='__main__':
-    import tkinter as tk
-    root = tk.Tk()
-    sound_manager = SoundManager()
-    sounds = [sound_manager.time_remaining_sounds[0], sound_manager.misc_sounds['boxingbell'], sound_manager.period_sounds[6], sound_manager.time_remaining_sounds[20]]
-    times = [0.0, 5.0, 8.0, 9.0]
-    sound_manager.play_sounds_in_sequence(sounds, times)
-    root.mainloop()
-
