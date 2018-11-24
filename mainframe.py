@@ -14,7 +14,7 @@ from soundmanager.soundmanager import SoundManager
 
 
 class App(tk.Tk):
-    def __init__(self, announcement_handler, *args, **kwargs):
+    def __init__(self, announcement_handler = None, *args, **kwargs):
         super(App, self).__init__(*args, **kwargs)
         self.announcement_handler = announcement_handler
 
@@ -119,19 +119,18 @@ class MockMusicController:
 
 
 
-
+root = App()
 try:
-    vlc_connection = VLCConnection(r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe")
+    vlc_connection = VLCConnection(r"C:\oProgram Files (x86)\VideoLAN\VLC\vlc.exe")
     vlc_music_manager = VLCMusicManager(vlc_connection)
     vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
 except FileNotFoundError:
     messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
     vlc_connection = None
     vlc_music_manager = None
-
 sound_manager = SoundManager('sounds', vlc_music_manager)
-anouncement_handler = AnnouncementTimeHandler(sound_manager)
-root = App(anouncement_handler.handle_script_announcements)
+announcement_handler = AnnouncementTimeHandler(sound_manager)
+root.announcement_handler = announcement_handler.handle_script_announcements
 
 def on_close():
     if vlc_connection:

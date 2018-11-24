@@ -19,7 +19,7 @@ class SoundManager:
         self.time_remaining_sounds = []
         for i in range(0, 61):
             if i == 0:
-                sound_file_name = sound_file_name = os.path.join(root_directory, 'fivecountdown.wav')
+                sound_file_name = os.path.join(root_directory, 'fivecountdown.wav')
             else:
                 minutes_remaining_str = str(i // 2) if (i // 2) >= 10 else '0' + str(i // 2)
                 seconds_remaing_str = '00' if i % 2 == 0 else '30'
@@ -49,7 +49,7 @@ class SoundManager:
                         self.music_controller.fade_out_music()
                     else:
                         self.music_controller.fade_in_music()
-                else:
+                elif not isinstance(sounds[index], str):
                     self.channel.play(sounds[index])
                 index += 1
 
