@@ -4,9 +4,10 @@ import time
 import os.path
 
 class SoundManager:
-    def __init__(self, root_directory):
+    def __init__(self, root_directory, music_controller = None):
         mixer.init()
         self.channel = mixer.Channel(0)
+        self.music_controller = music_controller
 
         #load in all the sounds into appropriate
         self.period_sounds = []
@@ -32,10 +33,10 @@ class SoundManager:
         self.misc_sounds['endofscript'] = mixer.Sound(os.path.join(root_directory, 'endofscript.wav'))
 
     def play_sounds_in_sequence(self, sounds, times):
-        thread = threading.Thread(target=self.threaded_play_sounds_in_sequence, args=(sounds, times))
+        thread = threading.Thread(target=self.play_sounds_in_sequence_run, args=(sounds, times), daemon=True)
         thread.start()
 
-    def threaded_play_sounds_in_sequence(self, sounds, times):
+    def play_sounds_in_sequence_run(self, sounds, times):
         start_time = time.clock()
 
         elapsed_time = time.clock() - start_time
@@ -43,7 +44,13 @@ class SoundManager:
         while elapsed_time < times[-1]:
             elapsed_time = time.clock() - start_time
             if elapsed_time >= times[index]:
-                self.channel.play(sounds[index])
+                if self.music_controller and isinstance(sounds[index], str):
+                    if sounds[index] == 'fade_out':
+                        self.music_controller.fade_out_music()
+                    else:
+                        self.music_controller.fade_in_music()
+                else:
+                    self.channel.play(sounds[index])
                 index += 1
 
 

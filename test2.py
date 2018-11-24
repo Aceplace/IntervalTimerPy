@@ -1,13 +1,9 @@
-import socket
-import tkinter as tk
-import subprocess
+import re
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.bind(('localhost',0))
+message = 'audio volume: 307'
 
-
-
-
-root = tk.Tk()
-
-root.mainloop()
+match = re.search(r'audio volume: \d*', message)
+if match:
+    print(match.group(0))
+else:
+    print('no match')

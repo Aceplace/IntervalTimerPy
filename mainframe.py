@@ -5,6 +5,8 @@ from tkinter import messagebox
 
 from intervaltimer.intervaltimer import IntervalTimer
 from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
+from mediaplayer.vlcconnection import VLCConnection
+from mediaplayer.vlcmusicmanager import VLCMusicManager
 from schedule.scheduleeditor import ScheduleEditor
 from schedule.scheduleeditorcontroller import ScheduleEditorController
 from soundmanager.announcementtimehandler import AnnouncementTimeHandler
@@ -108,10 +110,33 @@ class App(tk.Tk):
         self.destroy()
 
 
-sound_manager = SoundManager('sounds')
-anouncement_handler = AnnouncementTimeHandler(sound_manager)
+class MockMusicController:
+    def fade_out_music(self):
+        print('fading out')
 
+    def fade_in_music(self):
+        print('fading in')
+
+
+
+
+try:
+    vlc_connection = VLCConnection(r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe")
+    vlc_music_manager = VLCMusicManager(vlc_connection)
+    vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
+except FileNotFoundError:
+    messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
+    vlc_connection = None
+    vlc_music_manager = None
+
+sound_manager = SoundManager('sounds', vlc_music_manager)
+anouncement_handler = AnnouncementTimeHandler(sound_manager)
 root = App(anouncement_handler.handle_script_announcements)
+
+def on_close():
+    if vlc_connection:
+        vlc_connection.vlc_subprocess.kill()
+    root.on_close()
 root.state('zoomed')
-root.protocol('WM_DELETE_WINDOW', root.on_close)
+root.protocol('WM_DELETE_WINDOW', on_close)
 root.mainloop()
