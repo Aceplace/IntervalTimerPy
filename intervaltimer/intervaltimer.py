@@ -4,6 +4,7 @@ import json
 # Expected Script Format
 # List of Periods
 # Each Period -> {'length': , 'period number', 'period announcement times'}
+from mediaplayer.mediaplayergui import MediaPlayerGUI
 from misc.intervaltimerexception import IntervalTimerException
 
 
@@ -14,7 +15,7 @@ def seconds_to_minutes_seconds_string(num_seconds):
 
 
 class IntervalTimer(tk.Frame):
-    def __init__(self, root, script, prefs=None):
+    def __init__(self, root, script, media_interface, prefs):
         super(IntervalTimer, self).__init__(root)
         #Initialize interval timer values and preference values
         self.script = script
@@ -40,6 +41,12 @@ class IntervalTimer(tk.Frame):
         self.interval_timer_slider = tk.Scale(interval_timer_playback_frame, from_=0, to_=1800, showvalue=False, orient=tk.HORIZONTAL, command=self.slider_update)
         self.interval_timer_slider.grid(row=1, column=0, columnspan=4, stick='WE')
         interval_timer_playback_frame.grid(row=0, column=0, sticky='NSEW')
+
+        #Set up music playback widget
+        media_playback_frame = tk.Frame(self)
+        self.media_player_gui = MediaPlayerGUI(media_playback_frame, media_interface, padx=20)
+        self.media_player_gui.pack()
+        media_playback_frame.grid(row=0, column=1, sticky='E')
 
         #set up parent frame of the labels displaying the period number and time remaining
         lbls_parent_frame = tk.Frame(self)
@@ -187,5 +194,3 @@ class IntervalTimer(tk.Frame):
                       'time_lbl_two_digit_size': self.time_lbl_two_digit_size}
 
         return prefs_dict
-
-

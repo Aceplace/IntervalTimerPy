@@ -8,6 +8,10 @@ class VLCMusicManager:
         self.current_volume = 0
         self.fade_to_volume = 50
         self.waiting_for_current_volume = threading.Event()
+        self.sending_vlc_message_lock = threading.Lock()
+
+    def pause(self):
+        self.send_vlc_message('pause')
 
     def fade_out_music(self):
         fade_thread = threading.Thread(target=self.fade_out_music_run, daemon=True)
@@ -30,8 +34,8 @@ class VLCMusicManager:
                 elapsed_time = 1.5
             if not self.waiting_for_current_volume.is_set() and self.current_volume > self.fade_to_volume:
                 current_fade_volume = self.current_volume - (self.current_volume - self.fade_to_volume) * elapsed_time / 1.5
-                self.vlc_connection.send_message(f'volume {current_fade_volume}')
-        self.vlc_connection.send_message(f'volume {self.fade_to_volume}')
+                self.send_vlc_message(f'volume {current_fade_volume}')
+        self.send_vlc_message(f'volume {self.fade_to_volume}')
 
     def fade_in_music_run(self):
         start_fade_time = time.clock()
@@ -44,8 +48,13 @@ class VLCMusicManager:
                 elapsed_time = 1.5
             if self.current_volume > self.fade_to_volume:
                 current_fade_volume = self.fade_to_volume + (self.current_volume - self.fade_to_volume) * elapsed_time / 1.5
-                self.vlc_connection.send_message(f'volume {current_fade_volume}')
-        self.vlc_connection.send_message(f'volume {self.current_volume}')
+                self.send_vlc_message(f'volume {current_fade_volume}')
+        self.send_vlc_message(f'volume {self.current_volume}')
+
+    def send_vlc_message(self, message):
+        self.sending_vlc_message_lock.acquire()
+        self.vlc_connection.send_message(message)
+        self.sending_vlc_message_lock.release()
 
 
     def receive_vlc_messages(self, message):
