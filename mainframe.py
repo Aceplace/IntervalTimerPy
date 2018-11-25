@@ -121,23 +121,30 @@ class App(tk.Tk):
         self.save_prefs()
         self.destroy()
 
-root = App()
-try:
-    vlc_connection = VLCConnection(r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe")
-    vlc_music_manager = VLCMusicManager(vlc_connection)
-    vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
-except FileNotFoundError:
-    messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
-    vlc_connection = None
-    vlc_music_manager = None
-sound_manager = SoundManager('sounds', vlc_music_manager)
-announcement_handler = AnnouncementTimeHandler(sound_manager)
-root.announcement_handler = announcement_handler.handle_script_announcements
+if __name__=='__main__':
+    #attempt to load up vlc and wire the announcement handler
+    try:
+        vlc_connection = VLCConnection(r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe")
+        vlc_music_manager = VLCMusicManager(vlc_connection)
+        vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
+        vlc_loaded = True
+    except FileNotFoundError:
+        vlc_loaded = False
+        vlc_connection = None
+        vlc_music_manager = None
+    sound_manager = SoundManager('sounds', vlc_music_manager)
+    announcement_handler = AnnouncementTimeHandler(sound_manager)
 
-def on_close():
-    if vlc_connection:
-        vlc_connection.vlc_subprocess.kill()
-    root.on_close()
-root.state('zoomed')
-root.protocol('WM_DELETE_WINDOW', on_close)
-root.mainloop()
+    root = App()
+    root.announcement_handler = announcement_handler.handle_script_announcements
+
+    if not vlc_loaded:
+        messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
+
+    def on_close():
+        if vlc_connection:
+            vlc_connection.vlc_subprocess.kill()
+        root.on_close()
+    root.state('zoomed')
+    root.protocol('WM_DELETE_WINDOW', on_close)
+    root.mainloop()
