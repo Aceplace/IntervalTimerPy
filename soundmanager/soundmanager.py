@@ -9,7 +9,7 @@ class SoundManager:
         self.channel = mixer.Channel(0)
         self.music_controller = music_controller
 
-        #load in all the sounds into appropriate
+        #load in all the sounds and store references in proper dictionaries
         self.period_sounds = []
         for i in range(0, 41):
             sound_file_name = 'period' + str(i) + '.wav' if i >= 10 else 'period0' + str(i) + '.wav'

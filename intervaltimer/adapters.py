@@ -1,7 +1,6 @@
 from misc.utils import half_minutes_to_seconds
 from practiceschedule import schedule
 
-
 def schedule_to_interval_timer_script(schedule, period_announcment_prefs):
     script = []
     for period_length in schedule.periods:

@@ -54,20 +54,3 @@ class VLCConnection:
 
 
 
-
-if __name__=='__main__':
-    import tkinter as tk
-    root = tk.Tk()
-
-    def print_vlc_connection_message(message):
-        print(message)
-
-    vlc_connection = VLCConnection(r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe", print_vlc_connection_message)
-
-    message_entry = tk.Entry(root)
-    message_entry.pack()
-    tk.Button(root, text='Send', command=lambda: vlc_connection.send_message(message_entry.get())).pack()
-
-    root.mainloop()
-
-

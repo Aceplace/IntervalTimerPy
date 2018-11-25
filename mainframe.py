@@ -2,7 +2,6 @@ import tkinter as tk
 import json
 
 import intervaltimer.adapters
-import intervaltimer.periodannouncementadapter as paadapt
 from tkinter import messagebox
 
 from intervaltimer.intervaltimer import IntervalTimer
@@ -20,10 +19,11 @@ class App(tk.Tk):
         super(App, self).__init__(*args, **kwargs)
         self.announcement_handler = announcement_handler
 
-        #load up preferences
+        # Load up preferences
         self.load_prefs()
 
-        #menu setup
+        # Gui Setup
+        # Menu setup
         menubar = tk.Menu(self)
         filemenu = tk.Menu(menubar, tearoff = 0)
         filemenu.add_command(label='Exit', command=self.on_close)
@@ -37,7 +37,7 @@ class App(tk.Tk):
         menubar.add_cascade(label='View', menu=viewmenu)
         self.config(menu=menubar)
 
-        #frame set ups
+        # Frame set ups
         self.mainframe = tk.Frame(self)
         self.mainframe.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.mainframe.grid_rowconfigure(0, weight=1)
@@ -60,12 +60,15 @@ class App(tk.Tk):
                 prefs_dict = json.load(file)
         except (IOError, json.decoder.JSONDecodeError) as e:
             messagebox.showerror('Load Preferences Error', str(e))
+        # Convert the json dictionary to a more appropriate dictionary for the program
         self.prefs_dict = {}
+        # Handle interval timer prefs
         try:
             self.prefs_dict['interval_timer_prefs'] = prefs_dict['interval_timer_prefs']
         except KeyError:
             messagebox.showerror('Load Preferences Error', 'Couldn\'t load interval timer preferences.')
             self.prefs_dict['interval_timer_prefs'] = None
+        # Handle announcement time prefs
         try:
             announcement_time_prefs_string_keys = prefs_dict['announcement_time_prefs']
             self.prefs_dict['announcement_time_prefs'] = intervaltimer.adapters.convert_to_interval_timer_period_announcement_times(
@@ -77,6 +80,7 @@ class App(tk.Tk):
     def change_view(self):
         if self.viewmenu_option.get() == 1:
             if self.frames[IntervalTimer]:
+                # Clear interval timer out
                 self.prefs_dict['interval_timer_prefs'] = self.frames[IntervalTimer].get_prefs_as_dict()
                 self.frames[IntervalTimer].grid_forget()
                 self.frames[IntervalTimer].destroy()
@@ -84,7 +88,13 @@ class App(tk.Tk):
             self.current_frame = self.frames[ScheduleEditor]
         elif self.viewmenu_option.get() == 2:
             if len(self.schedule_editor_controller.schedule.periods) >= 1:
-                self.setup_interval_timer()
+                # Set up interval timer script
+                interval_timer_script = schedule_to_interval_timer_script(self.schedule_editor_controller.schedule,
+                                                                          self.prefs_dict['announcement_time_prefs'])
+                self.frames[IntervalTimer] = IntervalTimer(self.mainframe, interval_timer_script,
+                                                           self.prefs_dict['interval_timer_prefs'])
+                self.frames[IntervalTimer].grid(row=0, column=0, sticky='NSEW')
+                self.frames[IntervalTimer].announcement_callback = self.announcement_handler
                 self.current_frame = self.frames[IntervalTimer]
             else:
                 messagebox.showerror('Interval Timer Error', 'Script must have at least one period.')
@@ -111,19 +121,9 @@ class App(tk.Tk):
         self.save_prefs()
         self.destroy()
 
-
-class MockMusicController:
-    def fade_out_music(self):
-        print('fading out')
-
-    def fade_in_music(self):
-        print('fading in')
-
-
-
 root = App()
 try:
-    vlc_connection = VLCConnection(r"C:\oProgram Files (x86)\VideoLAN\VLC\vlc.exe")
+    vlc_connection = VLCConnection(r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe")
     vlc_music_manager = VLCMusicManager(vlc_connection)
     vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
 except FileNotFoundError:

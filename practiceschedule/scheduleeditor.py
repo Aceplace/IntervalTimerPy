@@ -14,14 +14,19 @@ class ScheduleEditor(tk.Frame):
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
+        # Set up widgets for adding periods to the schedule
         add_period_buttons_frame = tk.Frame(self)
         tk.Label(add_period_buttons_frame, text='Add Period:').grid(row=0, column=0,
                                                                     columnspan=ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW,
                                                                     sticky='W')
         for i in range(1, Schedule.MAX_PERIOD_LENGTH + 1):
-            self.create_add_period_button(add_period_buttons_frame, i)
+            button = tk.Button(add_period_buttons_frame, text=half_minutes_to_min_sec_str(i), command=lambda i=i:self.add_period(i))
+            row = (i - 1) // ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW + 1
+            column = (i - 1) % ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW
+            button.grid(row=row, column=column, sticky='EW')
         add_period_buttons_frame.grid(row=0, column=0, sticky='NW')
 
+        # Set up widget that displays the current schedule
         periods_frame = tk.Frame(self)
         periods_scrollbar = tk.Scrollbar(periods_frame)
         periods_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -31,6 +36,7 @@ class ScheduleEditor(tk.Frame):
         periods_scrollbar.configure(command=self.periods_lb.yview)
         periods_frame.grid(row=0, column=1, sticky='NS')
 
+        # Set up widgets for misc schedule actions
         misc_items_frame = tk.Frame(self)
         delete_period_btn = tk.Button(misc_items_frame, text='Delete Period', command=self.delete_period)
         delete_period_btn.pack()
@@ -45,13 +51,6 @@ class ScheduleEditor(tk.Frame):
         misc_items_frame.grid(row=0, column=2, sticky='NW')
 
         self.refresh_periods_lb()
-
-
-    def create_add_period_button(self, parent, index):
-        button = tk.Button(parent, text=half_minutes_to_min_sec_str(index), command=lambda:self.add_period(index))
-        row = (index - 1) // ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW + 1
-        column =  (index - 1) % ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW
-        button.grid(row=row, column=column, sticky='EW')
 
 
     def delete_period(self):

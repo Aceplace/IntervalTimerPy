@@ -51,7 +51,6 @@ class VLCMusicManager:
     def receive_vlc_messages(self, message):
         match = re.search(r'audio volume: \d\d*', message)
         if match and self.waiting_for_current_volume.is_set():
-            print('dealing with it')
             parsed_message = match.group(0)
             volume = int(parsed_message.split(' ')[2])
             self.current_volume = volume
