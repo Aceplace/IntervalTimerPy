@@ -23,3 +23,9 @@ def min_sec_str_to_half_minutes(min_sec_str):
     extra_half_minute = 1 if parsed_period_length_string[1] == '30' else 0
     num_half_minutes = num_minutes * 2 + extra_half_minute
     return num_half_minutes
+
+
+def seconds_to_minutes_seconds_string(num_seconds):
+    num_minutes_string = str(num_seconds // 60)
+    num_seconds_string = str(num_seconds % 60) if num_seconds % 60 >= 10 else '0' + str(num_seconds % 60)
+    return f'{num_minutes_string}:{num_seconds_string}'

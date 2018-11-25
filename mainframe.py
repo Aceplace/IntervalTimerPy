@@ -16,12 +16,13 @@ from soundmanager.soundmanager import SoundManager
 
 
 class App(tk.Tk):
-    def __init__(self, prefs, announcement_handler, media_interface, *args, **kwargs):
+    def __init__(self, prefs, announcement_handler, media_interface, external_interface, *args, **kwargs):
         super(App, self).__init__(*args, **kwargs)
         #initialize passed in values
         self.announcement_handler = announcement_handler
         self.prefs_dict = prefs
         self.media_interface = media_interface
+        self.external_interface = None
 
         # Gui Setup
         # Menu setup
@@ -65,6 +66,8 @@ class App(tk.Tk):
                 self.frames[IntervalTimer].destroy()
                 self.frames[IntervalTimer] = None
             self.current_frame = self.frames[ScheduleEditor]
+            if self.external_interface:
+                self.external_interface.interval_timer = None
         elif self.view_menu_option.get() == 2:
             if len(self.schedule_editor_controller.schedule.periods) >= 1:
                 # Set up interval timer script
@@ -75,18 +78,14 @@ class App(tk.Tk):
                 self.frames[IntervalTimer].grid(row=0, column=0, sticky='NSEW')
                 self.frames[IntervalTimer].announcement_callback = self.announcement_handler
                 self.current_frame = self.frames[IntervalTimer]
+                if self.external_interface:
+                    self.external_interface.interval_timer = self.frames[IntervalTimer]
             else:
                 messagebox.showerror('Interval Timer Error', 'Script must have at least one period.')
                 self.view_menu_option.set(1)
 
         self.current_frame.tkraise()
 
-    def setup_interval_timer(self):
-        interval_timer_script = schedule_to_interval_timer_script(self.schedule_editor_controller.schedule,
-                                                                  self.prefs_dict['announcement_time_prefs'])
-        self.frames[IntervalTimer] = IntervalTimer(self.mainframe, interval_timer_script, self.prefs_dict['interval_timer_prefs'])
-        self.frames[IntervalTimer].grid(row=0, column=0, sticky='NSEW')
-        self.frames[IntervalTimer].announcement_callback = self.announcement_handler
 
     def on_close(self):
         if self.frames[IntervalTimer]:
@@ -115,7 +114,7 @@ if __name__=='__main__':
     sound_manager = SoundManager('sounds', vlc_music_manager)
     announcement_handler = AnnouncementTimeHandler(sound_manager)
 
-    root = App(prefs, announcement_handler.handle_script_announcements, vlc_music_manager)
+    root = App(prefs, announcement_handler.handle_script_announcements, vlc_music_manager, None)
 
     if load_pref_errors:
         messagebox.showerror('Load preference errors', load_pref_errors)

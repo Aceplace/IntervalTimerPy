@@ -1,17 +1,6 @@
 import tkinter as tk
-import json
 
-# Expected Script Format
-# List of Periods
-# Each Period -> {'length': , 'period number', 'period announcement times'}
-from mediaplayer.mediaplayergui import MediaPlayerGUI
-from misc.intervaltimerexception import IntervalTimerException
-
-
-def seconds_to_minutes_seconds_string(num_seconds):
-    num_minutes_string = str(num_seconds // 60)
-    num_seconds_string = str(num_seconds % 60) if num_seconds % 60 >= 10 else '0' + str(num_seconds % 60)
-    return f'{num_minutes_string}:{num_seconds_string}'
+from misc.utils import seconds_to_minutes_seconds_string
 
 
 class IntervalTimer(tk.Frame):
@@ -22,6 +11,7 @@ class IntervalTimer(tk.Frame):
         self.current_period = 0
         self.time_remaining_in_period = 0
         self.is_playing = False
+        self.media_interface = media_interface
         self.period_lbl_size = 240 if not prefs else prefs['period_lbl_size']
         self.time_lbl_two_digit_size = 330 if not prefs else prefs['time_lbl_two_digit_size']
         self.time_lbl_one_digit_size = 370 if not prefs else prefs['time_lbl_one_digit_size']
@@ -35,7 +25,7 @@ class IntervalTimer(tk.Frame):
         interval_timer_playback_frame.grid_columnconfigure(3, weight=1)
         self.previous_period_btn = tk.Button(interval_timer_playback_frame, text='<<', command=self.previous_period)
         self.previous_period_btn.grid(row=0, column=0, sticky='W')
-        tk.Button(interval_timer_playback_frame, text='>', command=self.play_pause).grid(row=0, column=1, sticky='W')
+        tk.Button(interval_timer_playback_frame, text='>', command=self.pause_timer).grid(row=0, column=1, sticky='W')
         self.next_period_btn = tk.Button(interval_timer_playback_frame, text='>>', command=self.next_period)
         self.next_period_btn.grid(row=0, column=2, sticky='W')
         self.interval_timer_slider = tk.Scale(interval_timer_playback_frame, from_=0, to_=1800, showvalue=False, orient=tk.HORIZONTAL, command=self.slider_update)
@@ -43,9 +33,9 @@ class IntervalTimer(tk.Frame):
         interval_timer_playback_frame.grid(row=0, column=0, sticky='NSEW')
 
         #Set up music playback widget
-        media_playback_frame = tk.Frame(self)
-        self.media_player_gui = MediaPlayerGUI(media_playback_frame, media_interface, padx=20)
-        self.media_player_gui.pack()
+        media_playback_frame = tk.Frame(self, padx=20)
+        tk.Label(media_playback_frame, text='Media Playback: ').pack(side=tk.LEFT)
+        tk.Button(media_playback_frame, text='>', command=self.pause_media).pack(side=tk.RIGHT)
         media_playback_frame.grid(row=0, column=1, sticky='E')
 
         #set up parent frame of the labels displaying the period number and time remaining
@@ -133,7 +123,7 @@ class IntervalTimer(tk.Frame):
         self.period_lbl.configure(text=self.script[self.current_period]['period number'])
         self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
 
-    def play_pause(self):
+    def pause_timer(self):
         self.is_playing = not self.is_playing
         if self.is_playing:
             self.interval_timer_slider.configure(state=tk.DISABLED)
@@ -143,6 +133,11 @@ class IntervalTimer(tk.Frame):
             self.interval_timer_slider.configure(state=tk.NORMAL)
             self.previous_period_btn.configure(state=tk.NORMAL)
             self.next_period_btn.configure(state=tk.NORMAL)
+
+    def pause_media(self):
+        if self.media_interface:
+            self.media_interface.pause()
+
 
     def decrease_period_lbl_size(self):
         self.period_lbl_size -= 10
@@ -175,7 +170,8 @@ class IntervalTimer(tk.Frame):
         self.time_lbl.configure(font=('Times', self.get_time_label_size_for_time_remaining()))
 
     def get_time_label_size_for_time_remaining(self):
-        return self.time_lbl_two_digit_size if len(seconds_to_minutes_seconds_string(self.time_remaining_in_period)) == 5 else self.time_lbl_one_digit_size
+        return self.time_lbl_two_digit_size if len(
+            seconds_to_minutes_seconds_string(self.time_remaining_in_period)) == 5 else self.time_lbl_one_digit_size
 
     def slider_update(self, new_slider_value):
         self.time_remaining_in_period = self.script[self.current_period]['length'] - int(new_slider_value)
@@ -192,5 +188,7 @@ class IntervalTimer(tk.Frame):
         prefs_dict = {'period_lbl_size': self.period_lbl_size,
                       'time_lbl_one_digit_size': self.time_lbl_one_digit_size,
                       'time_lbl_two_digit_size': self.time_lbl_two_digit_size}
-
         return prefs_dict
+
+    def get_period_time_remaining_lbl_values(self):
+        return (self.period_lbl['text'], self.time_lbl['text'])
