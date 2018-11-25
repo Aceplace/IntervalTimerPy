@@ -1,3 +1,4 @@
+from misc.utils import half_minutes_to_min_sec_str
 from schedule.schedule import Schedule
 
 
@@ -9,7 +10,7 @@ class ScheduleEditorController:
         period_strings = []
 
         for index in range(0, len(self.schedule.periods)):
-            period_length_string = Schedule.period_length_to_string(self.schedule.periods[index])
+            period_length_string = half_minutes_to_min_sec_str(self.schedule.periods[index])
             period_number_string = str(index) if self.schedule.does_include_period_zero else str(index + 1)
             spaces = '      ' if len(period_number_string) == 1 else '    '
             period_strings.append(f'{period_number_string}{spaces}{period_length_string}')

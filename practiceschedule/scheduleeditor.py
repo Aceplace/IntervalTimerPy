@@ -1,5 +1,7 @@
 import tkinter as tk
-from schedule import schedule
+
+from misc.utils import half_minutes_to_min_sec_str
+from schedule.schedule import Schedule
 
 
 class ScheduleEditor(tk.Frame):
@@ -14,7 +16,7 @@ class ScheduleEditor(tk.Frame):
 
         add_period_buttons_frame = tk.Frame(self)
         tk.Label(add_period_buttons_frame, text='Add Period:').grid(row=0, column=0, columnspan=ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW, sticky='W')
-        for i in range(1, schedule.Schedule.MAX_PERIOD_LENGTH + 1):
+        for i in range(1, Schedule.MAX_PERIOD_LENGTH + 1):
             self.create_add_period_button(add_period_buttons_frame, i)
         add_period_buttons_frame.grid(row=0, column=0, sticky='NW')
 
@@ -43,7 +45,7 @@ class ScheduleEditor(tk.Frame):
 
 
     def create_add_period_button(self, parent, index):
-        button = tk.Button(parent, text=schedule.Schedule.period_length_to_string(index), command=lambda:self.add_period(index))
+        button = tk.Button(parent, text=half_minutes_to_min_sec_str(index), command=lambda:self.add_period(index))
         row = (index - 1) // ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW + 1
         column =  (index - 1) % ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW
         button.grid(row=row, column=column, sticky='EW')
