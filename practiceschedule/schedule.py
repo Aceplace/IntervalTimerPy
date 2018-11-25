@@ -15,10 +15,10 @@ class Schedule:
         return f'{num_minutes_string}:{extra_half_minute_string}'
 
     @staticmethod
-    def total_length_to_string(total_length):
-        hours = total_length // 120
-        minutes = (total_length - 120 * hours) // 2
-        extra_half_minute = (total_length - 120 * hours) % 2
+    def minutes_to_hr_min_sec_str(num_minutes):
+        hours = num_minutes // 120
+        minutes = (num_minutes - 120 * hours) // 2
+        extra_half_minute = (num_minutes - 120 * hours) % 2
         hours_string = str(hours)
         minutes_string = '0' + str(minutes) if minutes < 10 else str(minutes)
         extra_half_minute_string = '00' if extra_half_minute == 0 else '30'

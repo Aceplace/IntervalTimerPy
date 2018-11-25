@@ -1,14 +1,16 @@
 import tkinter as tk
 import json
+
+import intervaltimer.adapters
 import intervaltimer.periodannouncementadapter as paadapt
 from tkinter import messagebox
 
 from intervaltimer.intervaltimer import IntervalTimer
-from intervaltimer.scheduleintervaltimeradapter import schedule_to_interval_timer_script
+from intervaltimer.adapters import schedule_to_interval_timer_script
 from mediaplayer.vlcconnection import VLCConnection
 from mediaplayer.vlcmusicmanager import VLCMusicManager
-from schedule.scheduleeditor import ScheduleEditor
-from schedule.scheduleeditorcontroller import ScheduleEditorController
+from practiceschedule.scheduleeditor import ScheduleEditor
+from practiceschedule.scheduleeditorcontroller import ScheduleEditorController
 from soundmanager.announcementtimehandler import AnnouncementTimeHandler
 from soundmanager.soundmanager import SoundManager
 
@@ -66,11 +68,11 @@ class App(tk.Tk):
             self.prefs_dict['interval_timer_prefs'] = None
         try:
             announcement_time_prefs_string_keys = prefs_dict['announcement_time_prefs']
-            self.prefs_dict['announcement_time_prefs'] = paadapt.convert_to_interval_timer_period_announcement_times(
+            self.prefs_dict['announcement_time_prefs'] = intervaltimer.adapters.convert_to_interval_timer_period_announcement_times(
                 announcement_time_prefs_string_keys)
         except KeyError:
             messagebox.showerror('Load Preferences Error', 'Couldn\'t load announcement time preferences')
-            self.prefs_dict['announcement_time_prefs'] = paadapt.get_default_interval_timer_period_announcement_times()
+            self.prefs_dict['announcement_time_prefs'] = intervaltimer.adapters.get_default_interval_timer_period_announcement_times()
 
     def change_view(self):
         if self.viewmenu_option.get() == 1:

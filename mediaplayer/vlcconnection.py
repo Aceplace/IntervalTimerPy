@@ -45,7 +45,7 @@ class VLCConnection:
 
 
     def close_connection(self):
-        self.dispatch_thread_lock.acquire()
+        self.dispatch_thread_lock.acquire() #two possible threads may access this so neccessitating the lock
         if self.vlc_sock:
             self.vlc_sock.close()
             self.vlc_sock = None

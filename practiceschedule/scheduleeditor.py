@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from misc.utils import half_minutes_to_min_sec_str
-from schedule.schedule import Schedule
+from practiceschedule.schedule import Schedule
 
 
 class ScheduleEditor(tk.Frame):
@@ -15,7 +15,9 @@ class ScheduleEditor(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
 
         add_period_buttons_frame = tk.Frame(self)
-        tk.Label(add_period_buttons_frame, text='Add Period:').grid(row=0, column=0, columnspan=ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW, sticky='W')
+        tk.Label(add_period_buttons_frame, text='Add Period:').grid(row=0, column=0,
+                                                                    columnspan=ScheduleEditor.NUM_ITEMS_ADD_PERIOD_ROW,
+                                                                    sticky='W')
         for i in range(1, Schedule.MAX_PERIOD_LENGTH + 1):
             self.create_add_period_button(add_period_buttons_frame, i)
         add_period_buttons_frame.grid(row=0, column=0, sticky='NW')
@@ -34,7 +36,8 @@ class ScheduleEditor(tk.Frame):
         delete_period_btn.pack()
         self.include_period_zero_cb_value = tk.BooleanVar()
         self.include_period_zero_cb = tk.Checkbutton(misc_items_frame, text='Include Period Zero',
-                                                     variable=self.include_period_zero_cb_value, command=self.include_period_zero_click)
+                                                     variable=self.include_period_zero_cb_value,
+                                                     command=self.include_period_zero_click)
         self.include_period_zero_cb_value.set(self.controller.get_does_include_period_zero())
         self.include_period_zero_cb.pack()
         self.total_length_lbl = tk.Label(misc_items_frame, text='Total Length: 0:00:00')

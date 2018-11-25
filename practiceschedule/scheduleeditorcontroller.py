@@ -1,5 +1,5 @@
 from misc.utils import half_minutes_to_min_sec_str
-from schedule.schedule import Schedule
+from practiceschedule.schedule import Schedule
 
 
 class ScheduleEditorController:
@@ -31,5 +31,5 @@ class ScheduleEditorController:
 
     def get_total_length_string(self):
         total_length = self.schedule.get_total_length()
-        total_length_string = Schedule.total_length_to_string(total_length)
+        total_length_string = Schedule.minutes_to_hr_min_sec_str(total_length)
         return total_length_string

@@ -16,6 +16,7 @@ def seconds_to_minutes_seconds_string(num_seconds):
 class IntervalTimer(tk.Frame):
     def __init__(self, root, script, prefs=None):
         super(IntervalTimer, self).__init__(root)
+        #Initialize interval timer values and preference values
         self.script = script
         self.current_period = 0
         self.time_remaining_in_period = 0
@@ -28,6 +29,7 @@ class IntervalTimer(tk.Frame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
+        #Set up interval timer playback widgets
         interval_timer_playback_frame = tk.Frame(self)
         interval_timer_playback_frame.grid_columnconfigure(3, weight=1)
         self.previous_period_btn = tk.Button(interval_timer_playback_frame, text='<<', command=self.previous_period)
@@ -39,11 +41,13 @@ class IntervalTimer(tk.Frame):
         self.interval_timer_slider.grid(row=1, column=0, columnspan=4, stick='WE')
         interval_timer_playback_frame.grid(row=0, column=0, sticky='NSEW')
 
+        #set up parent frame of the labels displaying the period number and time remaining
         lbls_parent_frame = tk.Frame(self)
         lbls_parent_frame.grid(row=1, column=0, columnspan=2, sticky='NSEW')
         lbls_parent_frame.grid_rowconfigure(0, weight=1)
         lbls_parent_frame.grid_columnconfigure(1, weight=1)
 
+        #set up the label widget displaying the period number
         period_lbl_frame = tk.Frame(lbls_parent_frame)
         period_lbl_frame.grid_rowconfigure(1, weight=1)
         tk.Button(period_lbl_frame, text='Decrease Period Size', command=self.decrease_period_lbl_size).grid(row=0, column=0, stick='NW')
@@ -52,6 +56,7 @@ class IntervalTimer(tk.Frame):
         self.period_lbl.grid(row=1, column=0, columnspan=2, sticky='SW')
         period_lbl_frame.grid(row=0, column=0, sticky='NSEW')
 
+        #set up the widget displaying the time remaining in period
         time_lbl_frame = tk.Frame(lbls_parent_frame)
         time_lbl_frame.grid_rowconfigure(1, weight=1)
         time_lbl_frame.grid_columnconfigure(0, weight=1)
@@ -63,6 +68,7 @@ class IntervalTimer(tk.Frame):
         self.time_lbl.grid(row=1, column=0, columnspan=4, sticky='SE')
         time_lbl_frame.grid(row=0, column=1, sticky='NSEW')
 
+        #initialize the starting values and sizes of the label widgets
         if self.script:
             self.time_remaining_in_period = self.script[self.current_period]['length']
             self.period_lbl.configure(text=self.script[self.current_period]['period number'])
@@ -70,10 +76,11 @@ class IntervalTimer(tk.Frame):
             self.interval_timer_slider.configure(to_= self.time_remaining_in_period - 1)
             self.interval_timer_slider.set(0)
 
-
+        #this call back
         self.after(1000, self.on_second)
 
     def on_second(self):
+        #decrement the time and check on changes of state. Send the time to the announcement callback for it to handle.
         if self.is_playing and self.script:
             self.time_remaining_in_period -= 1
             if self.time_remaining_in_period <= 0:
@@ -88,12 +95,15 @@ class IntervalTimer(tk.Frame):
             if self.announcement_callback:
                 self.announcement_callback(self.current_period, self.time_remaining_in_period, self.script)
 
+        #Update the slider
         if self.script:
             self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
             self.interval_timer_slider.configure(state=tk.NORMAL)
             self.interval_timer_slider.set(self.script[self.current_period]['length'] - self.time_remaining_in_period)
             if self.is_playing:
                 self.interval_timer_slider.configure(state=tk.DISABLED)
+
+        #callback will invoke itself repeatadely so that it keeps happening
         self.after(1000, self.on_second)
 
     def previous_period(self):
@@ -164,10 +174,10 @@ class IntervalTimer(tk.Frame):
         self.time_remaining_in_period = self.script[self.current_period]['length'] - int(new_slider_value)
         self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
 
-    def load_prefs(self, prefs):
-        self.period_lbl_size = prefs['period_lbl_size']
-        self.time_lbl_one_digit_size = prefs['time_lbl_one_digit_size']
-        self.time_lbl_two_digit_size = prefs['time_lbl_two_digit_size']
+    def load_prefs(self, prefs_dict):
+        self.period_lbl_size = prefs_dict['period_lbl_size']
+        self.time_lbl_one_digit_size = prefs_dict['time_lbl_one_digit_size']
+        self.time_lbl_two_digit_size = prefs_dict['time_lbl_two_digit_size']
         self.time_lbl.configure(font=('Times', self.get_time_label_size_for_time_remaining()))
         self.period_lbl.configure(font=('Times',self.period_lbl_size))
 
