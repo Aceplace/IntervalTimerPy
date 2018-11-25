@@ -599,5 +599,8 @@
             50,
             55
         ]
+    },
+    "vlc_prefs": {
+        "vlc_path": "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
     }
 }
