@@ -1,6 +1,7 @@
 import tkinter as tk
 import json
 import intervaltimer.adapters
+import threading
 from tkinter import messagebox
 
 from intervaltimer.intervaltimer import IntervalTimer
@@ -23,6 +24,7 @@ class App(tk.Tk):
         self.announcement_handler = announcement_handler
         self.prefs_dict = prefs
         self.media_interface = media_interface
+        self.modify_interval_timer_lock = threading.Lock()
 
         # Gui Setup
         # Menu setup
@@ -59,6 +61,7 @@ class App(tk.Tk):
 
 
     def change_view(self):
+        self.modify_interval_timer_lock.acquire()
         if self.view_menu_option.get() == 1:
             if self.frames[IntervalTimer]:
                 # Clear interval timer out
@@ -80,7 +83,7 @@ class App(tk.Tk):
             else:
                 messagebox.showerror('Interval Timer Error', 'Script must have at least one period.')
                 self.view_menu_option.set(1)
-
+        self.modify_interval_timer_lock.release()
         self.current_frame.tkraise()
 
 
@@ -95,8 +98,28 @@ class App(tk.Tk):
         self.destroy()
 
     def handle_message(self, message):
-        print(message)
-        return message
+        self.modify_interval_timer_lock.acquire()
+        if self.frames[IntervalTimer]:
+            message = message.strip().upper()
+            if message == 'PAUSE_TIMER':
+                self.frames[IntervalTimer].pause_timer()
+                response = 'Pause Timer'
+            elif message == 'PAUSE_MEDIA':
+                self.frames[IntervalTimer].pause_media()
+                response = 'Pause Media'
+            elif message == 'Period_Time':
+                period, time = self.frames[IntervalTimer].get_period_time_remaining_lbl_values()
+                response = f'{period}    {time}'
+            else:
+                response = 'Unrecognized Command'
+        else:
+            if message == 'PAUSE_MEDIA' and self.media_interface:
+                self.media_interface.pause()
+                response = 'Pause Media'
+            else:
+                response = 'Interval Timer Not Active'
+        self.modify_interval_timer_lock.release()
+        return response
 
 
 
