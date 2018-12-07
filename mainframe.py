@@ -98,26 +98,45 @@ class App(tk.Tk):
         self.destroy()
 
     def handle_message(self, message):
+        print('message: ' + message)
         self.modify_interval_timer_lock.acquire()
+        message = message.strip().upper()
         if self.frames[IntervalTimer]:
-            message = message.strip().upper()
             if message == 'PAUSE_TIMER':
                 self.frames[IntervalTimer].pause_timer()
-                response = 'Pause Timer'
+                response = 'Pause Timer\n'
             elif message == 'PAUSE_MEDIA':
                 self.frames[IntervalTimer].pause_media()
-                response = 'Pause Media'
-            elif message == 'Period_Time':
+                response = 'Pause Media\n'
+            elif message == 'ADD_10':
+                self.frames[IntervalTimer].add_time_remaining_in_period(10)
+                response = 'Added 10 seconds\n'
+            elif message == 'ADD_30':
+                self.frames[IntervalTimer].add_time_remaining_in_period(30)
+                response = 'Added 30 seconds\n'
+            elif message == 'REMOVE_10':
+                self.frames[IntervalTimer].add_time_remaining_in_period(-10)
+                response = 'Removed 10 seconds\n'
+            elif message == 'REMOVE_30':
+                self.frames[IntervalTimer].add_time_remaining_in_period(-30)
+                response = 'Removed 30 seconds\n'
+            elif message == 'PERIOD_TIME':
                 period, time = self.frames[IntervalTimer].get_period_time_remaining_lbl_values()
-                response = f'{period}    {time}'
+                response = f'{period}    {time}\n'
+            elif message == 'NEXT_PERIOD':
+                self.frames[IntervalTimer].next_period()
+                response = 'Next period\n'
+            elif message == 'PREVIOUS_PERIOD':
+                self.frames[IntervalTimer].previous_period()
+                response = 'Previous period\n'
             else:
-                response = 'Unrecognized Command'
+                response = 'Unrecognized Command\n'
         else:
             if message == 'PAUSE_MEDIA' and self.media_interface:
                 self.media_interface.pause()
-                response = 'Pause Media'
+                response = 'Pause Media\n'
             else:
-                response = 'Interval Timer Not Active'
+                response = 'Interval Timer Not Active\n'
         self.modify_interval_timer_lock.release()
         return response
 

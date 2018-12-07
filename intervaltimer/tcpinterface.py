@@ -26,6 +26,8 @@ class TCPInterface:
         try:
             while True:
                 message = self.connection.recv(1024)
+                if not message:
+                    break
                 if self.message_callback:
                     response = self.message_callback(message.decode())
                 else:
@@ -35,6 +37,8 @@ class TCPInterface:
                 else:
                     self.connection.sendall('No response'.encode())
         except (ConnectionResetError, ConnectionAbortedError):
+            pass
+        finally:
             self.connection.close()
         threading.Thread(target=self.wait_for_connection, daemon=True).start()
 

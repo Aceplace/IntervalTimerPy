@@ -1,8 +1,8 @@
 {
     "interval_timer_prefs": {
         "period_lbl_size": 350,
-        "time_lbl_one_digit_size": 530,
-        "time_lbl_two_digit_size": 460
+        "time_lbl_one_digit_size": 350,
+        "time_lbl_two_digit_size": 280
     },
     "announcement_time_prefs": {
         "1": [
