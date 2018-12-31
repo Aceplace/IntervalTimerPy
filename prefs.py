@@ -13,10 +13,17 @@ def load_prefs():
         json_prefs_dict = {}
     # Convert the json dictionary to a more appropriate dictionary for the program
     prefs_dict = {}
+    # Handle schedule prefs
+    try:
+        prefs_dict['schedule_prefs'] = json_prefs_dict['schedule_prefs']
+    except KeyError as e:
+        load_pref_errors += str(e) + '\n'
+        prefs_dict['schedule_prefs'] = {}
+        prefs_dict['schedule_prefs']['last_schedule_directory'] = None
     # Handle interval timer prefs
     try:
         prefs_dict['interval_timer_prefs'] = json_prefs_dict['interval_timer_prefs']
-    except KeyError:
+    except KeyError as e:
         load_pref_errors += str(e) + '\n'
         prefs_dict['interval_timer_prefs'] = None
     # Handle announcement time prefs
@@ -24,13 +31,13 @@ def load_prefs():
         announcement_time_prefs_string_keys = json_prefs_dict['announcement_time_prefs']
         prefs_dict['announcement_time_prefs'] = \
             intervaltimer.adapters.convert_to_interval_timer_period_announcement_times(announcement_time_prefs_string_keys)
-    except KeyError:
+    except KeyError as e:
         load_pref_errors += str(e) + '\n'
         prefs_dict['announcement_time_prefs'] = intervaltimer.adapters.get_default_interval_timer_period_announcement_times()
     # Handle vlc prefs
     try:
         prefs_dict['vlc_prefs'] = json_prefs_dict['vlc_prefs']
-    except KeyError:
+    except KeyError as e:
         load_pref_errors += str(e) + '\n'
         prefs_dict['vlc_prefs'] = {'vlc_path': '', 'fade_to_volume': 50}
     return prefs_dict, load_pref_errors

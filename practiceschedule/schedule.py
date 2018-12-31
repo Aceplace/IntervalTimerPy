@@ -63,12 +63,13 @@ class Schedule:
     def get_schedule_json_string(self):
         return json.dumps(self.__dict__, indent=4)
 
-
     def load_from_json_string(self, json_string):
         try:
             parsed_json = json.loads(json_string)
-            self.periods = parsed_json['periods']
-            self.include_period_zero = parsed_json['does_include_period_zero']
-        except json.decoder.JSONDecodeError as e:
+            periods = parsed_json['periods']
+            does_include_period_zero = parsed_json['does_include_period_zero']
+            self.periods = periods
+            self.does_include_period_zero = does_include_period_zero
+        except (json.decoder.JSONDecodeError, KeyError) as e:
             raise IntervalTimerException(f'Schedule wrongly formatted: {str(e)}')
 

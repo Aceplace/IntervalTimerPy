@@ -1,4 +1,7 @@
 {
+    "schedule_prefs": {
+        "last_schedule_directory": "E:/OneDrive/Programming/IntervalTimerPY"
+    },
     "interval_timer_prefs": {
         "period_lbl_size": 350,
         "time_lbl_one_digit_size": 350,

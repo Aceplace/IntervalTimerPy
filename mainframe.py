@@ -1,8 +1,10 @@
+import os
 import tkinter as tk
 import json
 import intervaltimer.adapters
 import threading
 from tkinter import messagebox
+from tkinter import filedialog
 
 from intervaltimer.intervaltimer import IntervalTimer
 from intervaltimer.adapters import schedule_to_interval_timer_script
@@ -23,13 +25,13 @@ class App(tk.Tk):
         self.announcement_handler = announcement_handler
         self.prefs_dict = prefs
         self.media_interface = media_interface
+        self.last_schedule_directory = self.prefs_dict['schedule_prefs']['last_schedule_directory']
         self.modify_interval_timer_lock = threading.Lock()
 
         # Gui Setup
         # Menu setup
         menu_bar = tk.Menu(self)
         file_menu = tk.Menu(menu_bar, tearoff = 0)
-        file_menu.add_command(label='Exit', command=self.on_close)
         file_menu.add_command(label='Load Schedule', command=self.on_load_schedule)
         file_menu.add_command(label='Save Schedule', command=self.on_save_schedule)
         file_menu.add_separator()
@@ -62,10 +64,39 @@ class App(tk.Tk):
         self.current_frame.tkraise()
 
     def on_load_schedule(self):
-        pass
+        try:
+            if self.last_schedule_directory:
+                initial_dir = self.last_schedule_directory
+            else:
+                initial_dir = os.getcwd()
+            schedule_filename = filedialog.askopenfilename(initialdir=initial_dir, title="Load Schedule",
+                                                          filetypes=(("Schedule", "*.json"),))
+            if schedule_filename:
+                with open(schedule_filename, 'r') as file:
+                    json_text = file.read()
+                    self.frames[ScheduleEditor].schedule.load_from_json_string(json_text)
+                    self.frames[ScheduleEditor].refresh_periods_lb()
+                self.last_schedule_directory = os.path.dirname(schedule_filename)
+        except (IntervalTimerException, IOError) as e:
+            messagebox.showerror('Open Schedule Error', e)
 
     def on_save_schedule(self):
-        pass
+        try:
+            if self.last_schedule_directory:
+                initial_dir = self.last_schedule_directory
+            else:
+                initial_dir = os.getcwd()
+            schedule_filename = filedialog.asksaveasfilename(initialdir=initial_dir, title="Save Schedule",
+                                                            filetypes=(("Schedule", "*.json"),),
+                                                            defaultextension='.json')
+            if schedule_filename:
+                with open(schedule_filename, 'w') as file:
+                    json_text = self.frames[ScheduleEditor].schedule.get_schedule_json_string()
+                    file.write(json_text)
+                self.last_schedule_directory = os.path.dirname(schedule_filename)
+        except (IntervalTimerException, IOError) as e:
+            messagebox.showerror('Open Schedule Error', e)
+
 
     def change_view(self):
         self.modify_interval_timer_lock.acquire()
@@ -95,7 +126,9 @@ class App(tk.Tk):
 
 
     def on_close(self):
-        if self.frames[IntervalTimer]:
+        self.prefs_dict['schedule_prefs'] = {}
+        self.prefs_dict['schedule_prefs']['last_schedule_directory'] = self.last_schedule_directory
+        if self.frames[IntervalTimer] != None:
             self.prefs_dict['interval_timer_prefs'] = self.frames[IntervalTimer].get_prefs_as_dict()
         try:
             save_prefs(self.prefs_dict)
