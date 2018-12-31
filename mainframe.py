@@ -11,7 +11,6 @@ from mediaplayer.vlcconnection import VLCConnection
 from mediaplayer.vlcmusicmanager import VLCMusicManager
 from misc.intervaltimerexception import IntervalTimerException
 from practiceschedule.scheduleeditor import ScheduleEditor
-from practiceschedule.scheduleeditorcontroller import ScheduleEditorController
 from prefs import save_prefs, load_prefs
 from soundmanager.announcementtimehandler import AnnouncementTimeHandler
 from soundmanager.soundmanager import SoundManager
@@ -30,6 +29,10 @@ class App(tk.Tk):
         # Menu setup
         menu_bar = tk.Menu(self)
         file_menu = tk.Menu(menu_bar, tearoff = 0)
+        file_menu.add_command(label='Exit', command=self.on_close)
+        file_menu.add_command(label='Load Schedule', command=self.on_load_schedule)
+        file_menu.add_command(label='Save Schedule', command=self.on_save_schedule)
+        file_menu.add_separator()
         file_menu.add_command(label='Exit', command=self.on_close)
         menu_bar.add_cascade(label='File', menu=file_menu)
 
@@ -50,8 +53,7 @@ class App(tk.Tk):
 
         self.frames = {}
 
-        self.schedule_editor_controller = ScheduleEditorController()
-        self.frames[ScheduleEditor] = ScheduleEditor(self.mainframe, self.schedule_editor_controller)
+        self.frames[ScheduleEditor] = ScheduleEditor(self.mainframe)
         self.frames[ScheduleEditor].grid(row = 0, column = 0, sticky='NSEW')
 
         self.frames[IntervalTimer] = None
@@ -59,6 +61,11 @@ class App(tk.Tk):
         self.current_frame = self.frames[ScheduleEditor]
         self.current_frame.tkraise()
 
+    def on_load_schedule(self):
+        pass
+
+    def on_save_schedule(self):
+        pass
 
     def change_view(self):
         self.modify_interval_timer_lock.acquire()
@@ -71,9 +78,9 @@ class App(tk.Tk):
                 self.frames[IntervalTimer] = None
             self.current_frame = self.frames[ScheduleEditor]
         elif self.view_menu_option.get() == 2:
-            if len(self.schedule_editor_controller.schedule.periods) >= 1:
+            if len(self.frames[ScheduleEditor].schedule.periods) >= 1:
                 # Set up interval timer script
-                interval_timer_script = schedule_to_interval_timer_script(self.schedule_editor_controller.schedule,
+                interval_timer_script = schedule_to_interval_timer_script(self.frames[ScheduleEditor].schedule,
                                                                           self.prefs_dict['announcement_time_prefs'])
                 self.frames[IntervalTimer] = IntervalTimer(self.mainframe, interval_timer_script, self.media_interface,
                                                            self.prefs_dict['interval_timer_prefs'])

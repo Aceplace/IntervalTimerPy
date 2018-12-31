@@ -7,9 +7,9 @@ from practiceschedule.schedule import Schedule
 class ScheduleEditor(tk.Frame):
     NUM_ITEMS_ADD_PERIOD_ROW = 10
 
-    def __init__(self, root, controller):
+    def __init__(self, root):
         super(ScheduleEditor, self).__init__(root)
-        self.controller = controller
+        self.schedule = Schedule()
 
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -44,7 +44,7 @@ class ScheduleEditor(tk.Frame):
         self.include_period_zero_cb = tk.Checkbutton(misc_items_frame, text='Include Period Zero',
                                                      variable=self.include_period_zero_cb_value,
                                                      command=self.include_period_zero_click)
-        self.include_period_zero_cb_value.set(self.controller.get_does_include_period_zero())
+        self.include_period_zero_cb_value.set(self.schedule.does_include_period_zero)
         self.include_period_zero_cb.pack()
         self.total_length_lbl = tk.Label(misc_items_frame, text='Total Length: 0:00:00')
         self.total_length_lbl.pack()
@@ -57,7 +57,7 @@ class ScheduleEditor(tk.Frame):
         curse_selection = self.periods_lb.curselection()
         if curse_selection:
             curse_selection = curse_selection[0]
-            self.controller.remove_period_by_index(curse_selection)
+            self.schedule.remove_period_by_index(curse_selection)
             self.refresh_periods_lb()
             if curse_selection >= self.periods_lb.size():
                 curse_selection -= 1
@@ -67,7 +67,7 @@ class ScheduleEditor(tk.Frame):
 
 
     def include_period_zero_click(self):
-        self.controller.set_does_include_period_zero(self.include_period_zero_cb_value.get())
+        self.schedule.does_include_period_zero = self.include_period_zero_cb_value.get()
 
 
     def add_period(self, period_length):
@@ -75,9 +75,9 @@ class ScheduleEditor(tk.Frame):
         if curse_selection:
             index = curse_selection[0] + 1
         else:
-            index = len(self.controller.schedule.periods)
+            index = len(self.schedule.periods)
 
-        self.controller.add_period_at_index(index, period_length)
+        self.schedule.add_period_at_index(index, period_length)
         self.refresh_periods_lb()
         self.periods_lb.selection_set(index, index)
         self.periods_lb.activate(index)
@@ -85,10 +85,10 @@ class ScheduleEditor(tk.Frame):
 
     def refresh_periods_lb(self):
         self.periods_lb.delete(0, tk.END)
-        period_strings = self.controller.get_periods_as_strings()
+        period_strings = self.schedule.get_periods_as_strings()
         for period_string in period_strings:
             self.periods_lb.insert(tk.END, period_string)
-        total_length_string = self.controller.get_total_length_string()
+        total_length_string = self.schedule.get_total_length_string()
         self.total_length_lbl.configure(text=f'Total Length: {total_length_string}')
 
 
