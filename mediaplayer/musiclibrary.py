@@ -92,6 +92,13 @@ def pick_random_song_from_library(library):
     return song
 
 
+def get_random_song_path_from_library(library):
+    song = pick_random_song_from_library(library)
+    if not song:
+        return ''
+    return song['file_path']
+
+
 def get_number_of_songs_for_priority(library, priority):
     return len([song for song in chain(*library['categories'].values()) if song['priority'] == priority])
 

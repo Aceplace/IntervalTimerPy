@@ -605,5 +605,8 @@
     },
     "vlc_prefs": {
         "vlc_path": "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
+    },
+    "music_library_prefs": {
+        "music_library_path": "C:\\Users\\AcePl\\Desktop\\testlibrary4.json"
     }
 }

@@ -3,12 +3,14 @@ import tkinter as tk
 import json
 import intervaltimer.adapters
 import threading
+import mediaplayer.musiclibrary as ml
 from tkinter import messagebox
 from tkinter import filedialog
 
 from intervaltimer.intervaltimer import IntervalTimer
 from intervaltimer.adapters import schedule_to_interval_timer_script
 from intervaltimer.tcpinterface import TCPInterface
+from mediaplayer.automaticvlcmusicmanager import AutomaticVLCMusicManager
 from mediaplayer.vlcconnection import VLCConnection
 from mediaplayer.vlcmusicmanager import VLCMusicManager
 from misc.intervaltimerexception import IntervalTimerException
@@ -185,10 +187,22 @@ class App(tk.Tk):
 if __name__=='__main__':
     prefs, load_pref_errors = load_prefs()
 
-    #attempt to load up vlc and wire the announcement handler
+    # Attempt to load up music library.
+    try:
+        if prefs['music_library_prefs']['music_library_path']:
+            music_library = ml.load_library(prefs['music_library_prefs']['music_library_path'])
+        else:
+            music_library = None
+    except (FileNotFoundError, IOError):
+        music_library = None
+
+    # Attempt to load up vlc and wire the announcement handler
     try:
         vlc_connection = VLCConnection(prefs['vlc_prefs']['vlc_path'])
-        vlc_music_manager = VLCMusicManager(vlc_connection)
+        if music_library:
+            vlc_music_manager = AutomaticVLCMusicManager(vlc_connection, lambda: ml.get_random_song_path_from_library(music_library))
+        else:
+            vlc_music_manager = VLCMusicManager(vlc_connection)
         vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
         vlc_loaded = True
     except FileNotFoundError:
@@ -198,9 +212,11 @@ if __name__=='__main__':
     sound_manager = SoundManager('sounds', vlc_music_manager)
     announcement_handler = AnnouncementTimeHandler(sound_manager)
 
+    # Set up interface to allow clients to send messages to this program
     remote_tcp_interface = TCPInterface()
     remote_address = f'Listening locally at: {remote_tcp_interface.host_ip} : {remote_tcp_interface.port}'
 
+    # Set up app
     root = App(prefs, announcement_handler.handle_script_announcements, vlc_music_manager, remote_address)
     remote_tcp_interface.message_callback = root.handle_message
 
@@ -208,10 +224,14 @@ if __name__=='__main__':
         messagebox.showerror('Load preference errors', load_pref_errors)
     if not vlc_loaded:
         messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
+    if not music_library:
+        messagebox.showerror('Music Library Error', 'Couldn\'t load a music libary.')
 
     def on_close():
         if vlc_connection:
             vlc_connection.vlc_subprocess.kill()
+        if music_library:
+            ml.save_library(music_library, prefs['music_library_prefs']['music_library_path'])
         root.on_close()
 
     root.state('zoomed')
