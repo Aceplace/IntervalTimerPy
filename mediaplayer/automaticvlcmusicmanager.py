@@ -22,8 +22,10 @@ class AutomaticVLCMusicManager(VLCMusicManager):
         VLCMusicManager.receive_vlc_messages(self, message)
         match = re.search(r' stop state: 5 ', message)
         if match and self.get_song_callback:
-            new_song = self.get_song_callback()
-            self.send_vlc_message(f'add "{new_song}"')
+            new_song_path = self.get_song_callback()
+
+            if new_song_path:
+                self.send_vlc_message(f'add {new_song_path}')
 
 
 
