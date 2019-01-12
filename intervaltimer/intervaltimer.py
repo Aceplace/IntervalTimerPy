@@ -36,7 +36,8 @@ class IntervalTimer(tk.Frame):
         #Set up music playback widget
         media_playback_frame = tk.Frame(self, padx=20)
         tk.Label(media_playback_frame, text='Media Playback: ').pack(side=tk.LEFT)
-        tk.Button(media_playback_frame, text='>', command=self.pause_media).pack(side=tk.RIGHT)
+        tk.Button(media_playback_frame, text='Pause', command=self.pause_media).pack(side=tk.RIGHT)
+        tk.Button(media_playback_frame, text='Skip', command=self.skip_media).pack(side=tk.RIGHT)
         media_playback_frame.grid(row=0, column=1, sticky='E')
 
         #set up parent frame of the labels displaying the period number and time remaining
@@ -163,6 +164,10 @@ class IntervalTimer(tk.Frame):
     def pause_media(self):
         if self.media_interface:
             self.media_interface.pause()
+
+    def skip_media(self):
+        if self.media_interface:
+            self.media_interface.skip_song()
 
     def decrease_period_lbl_size(self):
         self.period_lbl_size -= 10

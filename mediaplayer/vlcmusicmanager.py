@@ -17,6 +17,9 @@ class VLCMusicManager:
         self.send_vlc_message('pause')
 
 
+    def skip_song(self):
+        self.vlc_connection.send_message('next')
+
     def fade_out_music(self):
         fade_thread = threading.Thread(target=self.fade_out_music_run, daemon=True)
         fade_thread.start()

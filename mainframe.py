@@ -143,13 +143,16 @@ class App(tk.Tk):
         print('message: ' + message)
         self.modify_interval_timer_lock.acquire()
         message = message.strip().upper()
-        if self.frames[IntervalTimer]:
+        if message == 'PAUSE_MEDIA' and self.media_interface:
+            self.media_interface.pause()
+            response = 'Pause Media\n'
+        elif message == 'SKIP_SONG' and self.media_interface:
+            self.media_interface.skip_song()
+            response = 'Skip Song\n'
+        elif self.frames[IntervalTimer]:
             if message == 'PAUSE_TIMER':
                 self.frames[IntervalTimer].pause_timer()
                 response = 'Pause Timer\n'
-            elif message == 'PAUSE_MEDIA':
-                self.frames[IntervalTimer].pause_media()
-                response = 'Pause Media\n'
             elif message == 'ADD_10':
                 self.frames[IntervalTimer].add_time_remaining_in_period(10)
                 response = 'Added 10 seconds\n'
@@ -174,11 +177,7 @@ class App(tk.Tk):
             else:
                 response = 'Unrecognized Command\n'
         else:
-            if message == 'PAUSE_MEDIA' and self.media_interface:
-                self.media_interface.pause()
-                response = 'Pause Media\n'
-            else:
-                response = 'Interval Timer Not Active\n'
+            response = 'Interval Timer Not Active\n'
         self.modify_interval_timer_lock.release()
         return response
 

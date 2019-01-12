@@ -17,15 +17,19 @@ class AutomaticVLCMusicManager(VLCMusicManager):
             time.sleep(1.5)
             self.send_vlc_message('status')
 
+    def skip_song(self):
+        self.add_new_song_to_vlc()
 
     def receive_vlc_messages(self, message):
         VLCMusicManager.receive_vlc_messages(self, message)
         match = re.search(r' stop state: 5 ', message)
         if match and self.get_song_callback:
-            new_song_path = self.get_song_callback()
+            self.add_new_song_to_vlc()
 
-            if new_song_path:
-                self.send_vlc_message(f'add {new_song_path}')
+    def add_new_song_to_vlc(self):
+        new_song_path = self.get_song_callback()
+        if new_song_path:
+            self.send_vlc_message(f'add {new_song_path}')
 
 
 
