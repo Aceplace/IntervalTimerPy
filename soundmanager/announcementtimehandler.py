@@ -27,6 +27,9 @@ class AnnouncementTimeHandler:
                     time_in_next_period = script[current_period + 1]['length']
                     sounds.extend([self.sound_manager.time_remaining_sounds[time_in_next_period // 30], 'fade_in'])
                     times.extend([11.0, 12.5])
+                else:
+                    sounds.extend(['fade_in'])
+                    times.extend([11.5])
 
             self.sound_manager.play_sounds_in_sequence(sounds, times)
 
