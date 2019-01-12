@@ -3,6 +3,7 @@ import socket
 import subprocess
 import threading
 import json
+import time
 
 
 class VLCConnection:
@@ -17,8 +18,20 @@ class VLCConnection:
         #open vlc at that port and set up communication to vlc and from it
         self.vlc_subprocess = subprocess.Popen([vlc_path, '--intf', 'qt', '--extraintf', 'rc', '--rc-host', f'localhost:{self.port}'])
 
-        self.vlc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.vlc_sock.connect(('localhost',self.port))
+        # Connect to vlc. Have to try multiple times because we won't successfully connect to vlc
+        # until it is bound to the port, which could take a couple seconds.
+        connected_to_vlc = False
+        connection_attempts = 0
+        while not connected_to_vlc:
+            try:
+                self.vlc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.vlc_sock.connect(('localhost',self.port))
+                connected_to_vlc = True
+            except ConnectionRefusedError:
+                connection_attempts += 1
+                if connection_attempts >= 50:
+                    raise ConnectionRefusedError
+                time.sleep(0.1)
 
         receive_and_dispatch_messages_thread = threading.Thread(target=self.receive_and_dispatch_messages_from_vlc, daemon=True)
         self.done_dispatching_messages = threading.Event()
