@@ -16,6 +16,11 @@ class VLCMusicManager:
     def pause(self):
         self.send_vlc_message('pause')
 
+    def vol_up(self):
+        self.send_vlc_message('volup 1')
+
+    def vol_down(self):
+        self.send_vlc_message('voldown 1')
 
     def skip_song(self):
         self.vlc_connection.send_message('next')

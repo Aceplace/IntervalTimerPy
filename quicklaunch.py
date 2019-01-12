@@ -38,6 +38,12 @@ class RemoteMessageHandler:
         elif message == 'SKIP_SONG' and self.media_interface:
             self.media_interface.skip_song()
             response = 'Skip Song\n'
+        elif message == 'MEDIA_VOL_DOWN':
+            self.media_interface.vol_down()
+            response = 'Vol Down\n'
+        elif message == 'MEDIA_VOL_UP':
+            self.media_interface.vol_up()
+            response = 'Vol Down\n'
         elif self.interval_timer:
             if message == 'PAUSE_TIMER':
                 self.interval_timer.pause_timer()
