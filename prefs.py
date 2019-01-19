@@ -3,10 +3,10 @@ import intervaltimer.adapters
 from misc.intervaltimerexception import IntervalTimerException
 
 
-def load_prefs():
+def load_prefs(file_path):
     load_pref_errors = ''
     try:
-        with open('prefs.json', 'r') as file:
+        with open(file_path, 'r') as file:
             json_prefs_dict = json.load(file)
     except (IOError, json.decoder.JSONDecodeError) as e:
         load_pref_errors += str(e) + '\n'
@@ -45,14 +45,14 @@ def load_prefs():
         prefs_dict['music_library_prefs'] = json_prefs_dict['music_library_prefs']
     except KeyError as e:
         load_pref_errors += str(e) + '\n'
-        prefs_dict['music_library_prefs'] = {'path': None}
+        prefs_dict['music_library_prefs'] = {'music_library_path': None}
 
     return prefs_dict, load_pref_errors
 
 
-def save_prefs(prefs_dict):
+def save_prefs(prefs_dict, file_path):
     try:
-        with open('prefs.json', 'w') as file:
+        with open(file_path, 'w') as file:
             json.dump(prefs_dict, file, indent=4)
     except IOError as e:
         raise IntervalTimerException()

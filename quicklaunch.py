@@ -1,13 +1,11 @@
 import os
 import tkinter as tk
-import json
+import sys
 from collections import namedtuple
 
-import intervaltimer.adapters
 import threading
 import mediaplayer.musiclibrary as ml
 from tkinter import messagebox
-from tkinter import filedialog
 
 from intervaltimer.intervaltimer import IntervalTimer
 from intervaltimer.adapters import schedule_to_interval_timer_script
@@ -16,7 +14,6 @@ from mediaplayer.automaticvlcmusicmanager import AutomaticVLCMusicManager
 from mediaplayer.vlcconnection import VLCConnection
 from mediaplayer.vlcmusicmanager import VLCMusicManager
 from misc.intervaltimerexception import IntervalTimerException
-from practiceschedule.scheduleeditor import ScheduleEditor
 from prefs import save_prefs, load_prefs
 from soundmanager.announcementtimehandler import AnnouncementTimeHandler
 from soundmanager.soundmanager import SoundManager
@@ -78,7 +75,7 @@ class RemoteMessageHandler:
 
 
 
-SCHEDULE_DIRECTORY = r'E:\OneDrive\Programming\IntervalTimerPY\quicklaunchschedule'
+SCHEDULE_DIRECTORY = r"C:\Users\AcePl\Desktop\ITLaunchScript"
 
 # Assumes one properly formatted text file in directory
 def get_file_lines():
@@ -141,7 +138,9 @@ def parse_file_lines(lines):
     return script
 
 if __name__=='__main__':
-    prefs, load_pref_errors = load_prefs()
+    prefs, load_pref_errors = load_prefs(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
+    if load_pref_errors:
+        print(load_pref_errors)
 
     # Attempt to load up music library.
     try:
@@ -207,7 +206,7 @@ if __name__=='__main__':
 
         prefs['interval_timer_prefs'] = interval_timer.get_prefs_as_dict()
         try:
-            save_prefs(prefs)
+            save_prefs(prefs, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
         except IntervalTimerException:
             messagebox.showerror('Save Preferences Error', 'Couldn\'t save preferences')
 

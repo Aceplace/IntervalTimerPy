@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
-import json
-import intervaltimer.adapters
+import sys
 import threading
 import mediaplayer.musiclibrary as ml
 from tkinter import messagebox
@@ -133,7 +132,7 @@ class App(tk.Tk):
         if self.frames[IntervalTimer] != None:
             self.prefs_dict['interval_timer_prefs'] = self.frames[IntervalTimer].get_prefs_as_dict()
         try:
-            save_prefs(self.prefs_dict)
+            save_prefs(self.prefs_dict, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
         except IntervalTimerException:
             messagebox.showerror('Save Preferences Error', 'Couldn\'t save preferences')
 
@@ -190,7 +189,7 @@ class App(tk.Tk):
 
 
 if __name__=='__main__':
-    prefs, load_pref_errors = load_prefs()
+    prefs, load_pref_errors = load_prefs(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
 
     # Attempt to load up music library.
     try:
