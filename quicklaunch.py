@@ -73,20 +73,9 @@ class RemoteMessageHandler:
         self.modify_interval_timer_lock.release()
         return response
 
-
-
-SCHEDULE_DIRECTORY = r"C:\Users\AcePl\Desktop\ITLaunchScript"
-
 # Assumes one properly formatted text file in directory
-def get_file_lines():
-    directory_items = os.listdir(SCHEDULE_DIRECTORY)
-    if len(directory_items) != 1:
-        raise Exception('Directory should exactly one item')
-    full_path_name = os.path.join(SCHEDULE_DIRECTORY, directory_items[0])
-    if not os.path.isfile(full_path_name):
-        raise Exception('Directory should only contain one file')
-
-    with open(full_path_name, 'r') as file:
+def get_file_lines(file_path):
+    with open(file_path, 'r') as file:
         lines = file.read().splitlines()
 
     # Clean the list removing blank spaces and white spaces
@@ -172,7 +161,7 @@ if __name__=='__main__':
     remote_address = f'Listening locally at: {remote_tcp_interface.host_ip} : {remote_tcp_interface.port}'
 
     # Open up schedule script
-    parsed_schedule = parse_file_lines(get_file_lines())
+    parsed_schedule = parse_file_lines(get_file_lines(sys.argv[1]))
     ScheduleScript = namedtuple('ScheduleScript', 'periods does_include_period_zero')
     schedule_script = ScheduleScript(periods=parsed_schedule['periods'],
                                      does_include_period_zero=parsed_schedule['does_include_period_zero'])
