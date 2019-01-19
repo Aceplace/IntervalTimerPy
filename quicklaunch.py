@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 import sys
+import traceback
 from collections import namedtuple
 
 import threading
@@ -127,80 +128,89 @@ def parse_file_lines(lines):
     return script
 
 if __name__=='__main__':
-    prefs, load_pref_errors = load_prefs(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
-    if load_pref_errors:
-        print(load_pref_errors)
 
-    # Attempt to load up music library.
     try:
-        if prefs['music_library_prefs']['music_library_path']:
-            music_library = ml.load_library(prefs['music_library_prefs']['music_library_path'])
-        else:
-            music_library = None
-    except (FileNotFoundError, IOError):
-        music_library = None
+        prefs, load_pref_errors = load_prefs(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
+        if load_pref_errors:
+            print(load_pref_errors)
 
-    # Attempt to load up vlc and wire the announcement handler
-    try:
-        vlc_connection = VLCConnection(prefs['vlc_prefs']['vlc_path'])
-        if music_library:
-            vlc_music_manager = AutomaticVLCMusicManager(vlc_connection, lambda: ml.get_random_song_path_from_library(music_library))
-        else:
-            vlc_music_manager = VLCMusicManager(vlc_connection)
-        vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
-        vlc_loaded = True
-    except FileNotFoundError:
-        vlc_loaded = False
-        vlc_connection = None
-        vlc_music_manager = None
-    sound_manager = SoundManager('sounds', vlc_music_manager)
-    announcement_handler = AnnouncementTimeHandler(sound_manager)
-
-    # Set up interface to allow clients to send messages to this program
-    remote_tcp_interface = TCPInterface()
-    remote_address = f'Listening locally at: {remote_tcp_interface.host_ip} : {remote_tcp_interface.port}'
-
-    # Open up schedule script
-    parsed_schedule = parse_file_lines(get_file_lines(sys.argv[1]))
-    ScheduleScript = namedtuple('ScheduleScript', 'periods does_include_period_zero')
-    schedule_script = ScheduleScript(periods=parsed_schedule['periods'],
-                                     does_include_period_zero=parsed_schedule['does_include_period_zero'])
-    timer_script = schedule_to_interval_timer_script(schedule_script,
-                                                     prefs['announcement_time_prefs'])
-
-    # Set up quick launch interval timer app
-    root = tk.Tk()
-
-    interval_timer = IntervalTimer(root, timer_script, vlc_music_manager, prefs['interval_timer_prefs'])
-    interval_timer.pack(fill=tk.BOTH, expand=True)
-    tk.Label(text=remote_address).pack()
-    interval_timer.announcement_callback = announcement_handler.handle_script_announcements
-
-    remote_message_handler = RemoteMessageHandler(interval_timer, vlc_music_manager)
-    remote_tcp_interface.message_callback = remote_message_handler.handle_message
-
-
-    if load_pref_errors:
-        messagebox.showerror('Load preference errors', load_pref_errors)
-    if not vlc_loaded:
-        messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
-    if not music_library:
-        messagebox.showerror('Music Library Error', 'Couldn\'t load a music libary.')
-
-    def on_close():
-        if vlc_connection:
-            vlc_connection.vlc_subprocess.kill()
-        if music_library:
-            ml.save_library(music_library, prefs['music_library_prefs']['music_library_path'])
-
-        prefs['interval_timer_prefs'] = interval_timer.get_prefs_as_dict()
+        # Attempt to load up music library.
         try:
-            save_prefs(prefs, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
-        except IntervalTimerException:
-            messagebox.showerror('Save Preferences Error', 'Couldn\'t save preferences')
+            if prefs['music_library_prefs']['music_library_path']:
+                music_library = ml.load_library(prefs['music_library_prefs']['music_library_path'])
+            else:
+                music_library = None
+        except (FileNotFoundError, IOError):
+            music_library = None
 
-        root.destroy()
+        # Attempt to load up vlc and wire the announcement handler
+        try:
+            vlc_connection = VLCConnection(prefs['vlc_prefs']['vlc_path'])
+            if music_library:
+                vlc_music_manager = AutomaticVLCMusicManager(vlc_connection,
+                                                             lambda: ml.get_random_song_path_from_library(music_library),
+                                                             prefs['vlc_prefs']['fade_to_volume'])
+            else:
+                vlc_music_manager = VLCMusicManager(vlc_connection, prefs['vlc_prefs']['fade_to_volume'])
+            vlc_connection.vlc_message_callback = vlc_music_manager.receive_vlc_messages
+            vlc_loaded = True
+        except FileNotFoundError:
+            vlc_loaded = False
+            vlc_connection = None
+            vlc_music_manager = None
+        sound_manager = SoundManager(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'sounds'), vlc_music_manager)
+        announcement_handler = AnnouncementTimeHandler(sound_manager)
 
-    root.state('zoomed')
-    root.protocol('WM_DELETE_WINDOW', on_close)
-    root.mainloop()
+        # Set up interface to allow clients to send messages to this program
+        remote_tcp_interface = TCPInterface()
+        remote_address = f'Listening locally at: {remote_tcp_interface.host_ip} : {remote_tcp_interface.port}'
+
+        # Open up schedule script
+        parsed_schedule = parse_file_lines(get_file_lines(sys.argv[1]))
+        ScheduleScript = namedtuple('ScheduleScript', 'periods does_include_period_zero')
+        schedule_script = ScheduleScript(periods=parsed_schedule['periods'],
+                                         does_include_period_zero=parsed_schedule['does_include_period_zero'])
+        timer_script = schedule_to_interval_timer_script(schedule_script,
+                                                         prefs['announcement_time_prefs'])
+
+        # Set up quick launch interval timer app
+        root = tk.Tk()
+
+        interval_timer = IntervalTimer(root, timer_script, vlc_music_manager, prefs['interval_timer_prefs'])
+        interval_timer.pack(fill=tk.BOTH, expand=True)
+        tk.Label(text=remote_address).pack()
+        interval_timer.announcement_callback = announcement_handler.handle_script_announcements
+
+        remote_message_handler = RemoteMessageHandler(interval_timer, vlc_music_manager)
+        remote_tcp_interface.message_callback = remote_message_handler.handle_message
+
+
+        if load_pref_errors:
+            messagebox.showerror('Load preference errors', load_pref_errors)
+        if not vlc_loaded:
+            messagebox.showerror('Connect to VLC Error', 'Couldn\'t connect to VLC')
+        if not music_library:
+            messagebox.showerror('Music Library Error', 'Couldn\'t load a music libary.')
+
+        def on_close():
+            if vlc_connection:
+                vlc_connection.vlc_subprocess.kill()
+            if music_library:
+                ml.save_library(music_library, prefs['music_library_prefs']['music_library_path'])
+
+            prefs['interval_timer_prefs'] = interval_timer.get_prefs_as_dict()
+            try:
+                save_prefs(prefs, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'prefs.json'))
+            except IntervalTimerException:
+                messagebox.showerror('Save Preferences Error', 'Couldn\'t save preferences')
+
+            root.destroy()
+
+        root.state('zoomed')
+        root.protocol('WM_DELETE_WINDOW', on_close)
+        root.mainloop()
+    except:
+        traceback.print_exc()
+        print('Press enter to exit')
+        input()
+

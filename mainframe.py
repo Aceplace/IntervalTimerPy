@@ -213,7 +213,7 @@ if __name__=='__main__':
         vlc_loaded = False
         vlc_connection = None
         vlc_music_manager = None
-    sound_manager = SoundManager('sounds', vlc_music_manager)
+    sound_manager = SoundManager(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'sounds'), vlc_music_manager)
     announcement_handler = AnnouncementTimeHandler(sound_manager)
 
     # Set up interface to allow clients to send messages to this program

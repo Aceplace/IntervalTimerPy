@@ -3,10 +3,10 @@ import re
 import threading
 
 class VLCMusicManager:
-    def __init__(self, vlc_connection):
+    def __init__(self, vlc_connection, fade_to_volume=50):
         self.vlc_connection = vlc_connection
         self.current_volume = 0
-        self.fade_to_volume = 50
+        self.fade_to_volume = fade_to_volume
         self.skip_fade = False
         self.restoring_current_volume = False
         self.waiting_for_current_volume = threading.Event()

@@ -39,7 +39,10 @@ class TCPInterface:
         except (ConnectionResetError, ConnectionAbortedError):
             pass
         finally:
+            print('Connection closed')
             self.connection.close()
+            self.connected = False
+            self.connection = None
         threading.Thread(target=self.wait_for_connection, daemon=True).start()
 
 

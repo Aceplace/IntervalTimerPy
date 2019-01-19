@@ -6,8 +6,8 @@ from mediaplayer.vlcmusicmanager import VLCMusicManager
 
 
 class AutomaticVLCMusicManager(VLCMusicManager):
-    def __init__(self, vlc_connection, get_song_callback):
-        VLCMusicManager.__init__(self, vlc_connection)
+    def __init__(self, vlc_connection, get_song_callback, fade_to_volume):
+        VLCMusicManager.__init__(self, vlc_connection, fade_to_volume)
         self.get_song_callback = get_song_callback
         threading.Thread(target=self.check_for_adding_song, daemon=True).start()
 
