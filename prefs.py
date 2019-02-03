@@ -39,7 +39,7 @@ def load_prefs(file_path):
         prefs_dict['vlc_prefs'] = json_prefs_dict['vlc_prefs']
     except KeyError as e:
         load_pref_errors += str(e) + '\n'
-        prefs_dict['vlc_prefs'] = {'vlc_path': '', 'fade_to_volume': 50}
+        prefs_dict['vlc_prefs'] = {'vlc_path': '', 'fade_to_volume': 100}
     # Handle music library prefs
     try:
         prefs_dict['music_library_prefs'] = json_prefs_dict['music_library_prefs']
