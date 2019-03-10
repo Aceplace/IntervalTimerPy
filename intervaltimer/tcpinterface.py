@@ -24,6 +24,7 @@ class TCPInterface:
 
     def handle_messages(self):
         try:
+            self.connection.settimeout(10)
             while True:
                 message = self.connection.recv(1024)
                 if not message:
@@ -36,7 +37,7 @@ class TCPInterface:
                     self.connection.sendall(response.encode())
                 else:
                     self.connection.sendall('No response'.encode())
-        except (ConnectionResetError, ConnectionAbortedError):
+        except (ConnectionResetError, ConnectionAbortedError, socket.timeout):
             pass
         finally:
             print('Connection closed')
