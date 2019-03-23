@@ -604,9 +604,10 @@
         ]
     },
     "vlc_prefs": {
-        "vlc_path": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"
+        "vlc_path": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+        "fade_to_volume": 100
     },
     "music_library_prefs": {
-        "music_library_path": "C:\\Users\\AcePl\\OneDrive\\Programming\\MusicChooser\\laptoplibrary.json"
+        "music_library_path": "D:\\OneDrive\\FootballPlaylists\\cheltenhamlib4alienware.json"
     }
 }

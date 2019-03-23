@@ -26,7 +26,9 @@ class TCPInterface:
         try:
             self.connection.settimeout(10)
             while True:
+                print("TCP Connection Waiting...")
                 message = self.connection.recv(1024)
+                print(f"TCP Connection Received Message: {message}")
                 if not message:
                     break
                 if self.message_callback:
@@ -34,8 +36,10 @@ class TCPInterface:
                 else:
                     response = 'No attached interval timer.'
                 if response:
+                    print(f"TCP Connection Sending Response: {response}")
                     self.connection.sendall(response.encode())
                 else:
+                    print(f"TCP Connection Sending Response: No response")
                     self.connection.sendall('No response'.encode())
         except (ConnectionResetError, ConnectionAbortedError, socket.timeout):
             pass

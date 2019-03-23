@@ -27,7 +27,7 @@ class RemoteMessageHandler:
         self.modify_interval_timer_lock = threading.Lock()
 
     def handle_message(self, message):
-        print('message: ' + message)
+        print('Remote Message Handler: ' + message)
         self.modify_interval_timer_lock.acquire()
         message = message.strip().upper()
         if message == 'PAUSE_MEDIA' and self.media_interface:
@@ -144,6 +144,7 @@ if __name__=='__main__':
             music_library = None
 
         # Attempt to load up vlc and wire the announcement handler
+        print(prefs)
         try:
             vlc_connection = VLCConnection(prefs['vlc_prefs']['vlc_path'])
             if music_library:
