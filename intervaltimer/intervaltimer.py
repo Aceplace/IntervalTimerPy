@@ -78,40 +78,38 @@ class IntervalTimer(tk.Frame):
             self.interval_timer_slider.configure(to_= self.time_remaining_in_period - 1)
             self.interval_timer_slider.set(0)
 
-        threading.Thread(target=self.on_second, daemon=True).start()
+        #threading.Thread(target=self.on_second, daemon=True).start()
+        self.after(1000, self.on_second)
 
     def on_second(self):
+        self.affecting_timer_lock.acquire()
+
         start_time = time.time()
-        while True:
-            print("Interval Timer On Second Executing")
-            self.affecting_timer_lock.acquire()
-            print("Interval Timer On Second aquired lock")
-            #decrement the time and check on changes of state. Send the time to the announcement callback for it to handle.
-            if self.is_playing and self.script:
-                self.time_remaining_in_period -= 1
-                if self.time_remaining_in_period <= 0:
-                    self.current_period += 1
-                    if self.current_period >= len(self.script):
-                        self.is_playing = False
-                        self.current_period = 0
-                    self.time_remaining_in_period = self.script[self.current_period]['length']
-                    self.interval_timer_slider.configure(to_=self.time_remaining_in_period - 1)
-                    self.period_lbl.configure(text=str(self.script[self.current_period]['period number']))
+        #decrement the time and check on changes of state. Send the time to the announcement callback for it to handle.
+        if self.is_playing and self.script:
+            self.time_remaining_in_period -= 1
+            if self.time_remaining_in_period <= 0:
+                self.current_period += 1
+                if self.current_period >= len(self.script):
+                    self.is_playing = False
+                    self.current_period = 0
+                self.time_remaining_in_period = self.script[self.current_period]['length']
+                self.interval_timer_slider.configure(to_=self.time_remaining_in_period - 1)
+                self.period_lbl.configure(text=str(self.script[self.current_period]['period number']))
 
-                if self.announcement_callback:
-                    self.announcement_callback(self.current_period, self.time_remaining_in_period, self.script)
+            if self.announcement_callback:
+                self.announcement_callback(self.current_period, self.time_remaining_in_period, self.script)
 
-            #Update the slider
-            if self.script:
-                self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
-                self.interval_timer_slider.configure(state=tk.NORMAL)
-                self.interval_timer_slider.set(self.script[self.current_period]['length'] - self.time_remaining_in_period)
-                if self.is_playing:
-                    self.interval_timer_slider.configure(state=tk.DISABLED)
+        #Update the slider
+        if self.script:
+            self.time_lbl.configure(text=seconds_to_minutes_seconds_string(self.time_remaining_in_period), font=('Times', self.get_time_label_size_for_time_remaining()))
+            self.interval_timer_slider.configure(state=tk.NORMAL)
+            self.interval_timer_slider.set(self.script[self.current_period]['length'] - self.time_remaining_in_period)
+            if self.is_playing:
+                self.interval_timer_slider.configure(state=tk.DISABLED)
 
-            self.affecting_timer_lock.release()
-            print("Interval Timer On Second released lock")
-            time.sleep(1.0 - ((time.time() - start_time) % 1.0))
+        self.affecting_timer_lock.release()
+        self.after(int((1.0 - ((time.time() - start_time) % 1.0)) * 1000), self.on_second)
 
 
     def previous_period(self):
@@ -139,9 +137,7 @@ class IntervalTimer(tk.Frame):
         self.affecting_timer_lock.release()
 
     def add_time_remaining_in_period(self, seconds_to_add):
-        print(f'Interval Timer: Adding Time {seconds_to_add}')
         self.affecting_timer_lock.acquire()
-        print(f'Adding Time {seconds_to_add} acquired lock')
         self.time_remaining_in_period += seconds_to_add
         if self.time_remaining_in_period > self.script[self.current_period]['length']:
             self.time_remaining_in_period = self.script[self.current_period]['length']
@@ -156,7 +152,6 @@ class IntervalTimer(tk.Frame):
             self.interval_timer_slider.configure(state=tk.DISABLED)
 
         self.affecting_timer_lock.release()
-        print(f'Adding Time {seconds_to_add} releases lock')
 
     def pause_timer(self):
         self.affecting_timer_lock.acquire()
